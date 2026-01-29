@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DOOM</string>
+    <string name="srv_name">DOOM Server</string>
+    <string name="app_description">Classic DOOM for Android - A tribute to the Johns</string>
+</resources>
