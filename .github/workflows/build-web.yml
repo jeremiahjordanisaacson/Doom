@@ -1,0 +1,86 @@
+name: "Build Web & Deploy Pages"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-wasm:
+    name: Build Emscripten/WASM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Emscripten SDK
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 3.1.51
+          actions-cache-folder: emsdk-cache
+
+      - name: Verify Emscripten
+        run: emcc --version
+
+      - name: Configure CMake with Emscripten toolchain
+        run: |
+          mkdir -p build-wasm
+          cd build-wasm
+          emcmake cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DDOOM_PLATFORM=web
+
+      - name: Build WASM
+        run: cmake --build build-wasm --config Release --parallel $(nproc)
+
+      - name: Prepare web artifact
+        run: |
+          mkdir -p web-dist
+          cp build-wasm/*.wasm web-dist/ 2>/dev/null || true
+          cp build-wasm/*.js web-dist/ 2>/dev/null || true
+          cp build-wasm/*.html web-dist/ 2>/dev/null || true
+          cp build-wasm/*.data web-dist/ 2>/dev/null || true
+          if [ -d ports/web/shell ]; then
+            cp -r ports/web/shell/* web-dist/
+          fi
+
+      - name: Upload WASM build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doom-wasm
+          path: web-dist/
+          retention-days: 7
+
+  deploy-pages:
+    name: Deploy to GitHub Pages
+    needs: build-wasm
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download WASM build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: doom-wasm
+          path: docs/
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

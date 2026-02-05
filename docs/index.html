@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOOM Multiplatform Mega-Repo</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        a { color: #cc0000; text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #ff3333; }
+
+        /* Nav */
+        nav {
+            background: #111;
+            border-bottom: 2px solid #cc0000;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #cc0000;
+            padding: 0.75rem 0;
+            letter-spacing: 4px;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+        }
+        nav ul li a {
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.75rem 0;
+            display: inline-block;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        nav ul li a:hover, nav ul li a.active {
+            color: #cc0000;
+            border-bottom-color: #cc0000;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+            background: linear-gradient(180deg, #1a0000 0%, #0a0a0a 100%);
+            border-bottom: 1px solid #222;
+        }
+        .hero h1 {
+            font-size: 5rem;
+            color: #cc0000;
+            letter-spacing: 12px;
+            text-transform: uppercase;
+            text-shadow: 0 0 30px rgba(204,0,0,0.5), 0 0 60px rgba(204,0,0,0.2);
+            margin-bottom: 0.5rem;
+        }
+        .hero .subtitle {
+            font-size: 1.1rem;
+            color: #888;
+            margin-bottom: 0.5rem;
+            letter-spacing: 2px;
+        }
+        .hero .tagline {
+            font-size: 1.6rem;
+            color: #e0e0e0;
+            margin: 1.5rem 0 2.5rem;
+            font-weight: bold;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.85rem 2rem;
+            border: 2px solid #cc0000;
+            color: #e0e0e0;
+            font-family: inherit;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            border-radius: 4px;
+        }
+        .btn:hover { background: #cc0000; color: #fff; }
+        .btn-primary { background: #cc0000; color: #fff; }
+        .btn-primary:hover { background: #8b0000; border-color: #8b0000; }
+
+        /* Sections */
+        section { padding: 4rem 2rem; max-width: 1100px; margin: 0 auto; }
+        section h2 {
+            font-size: 2rem;
+            color: #cc0000;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        section h2::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 2px;
+            background: #cc0000;
+            margin: 0.75rem auto 0;
+        }
+
+        /* About */
+        .about-text {
+            max-width: 750px;
+            margin: 0 auto;
+            text-align: center;
+            color: #bbb;
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        /* Platform Grid */
+        .platform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .platform-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .platform-card:hover {
+            border-color: #cc0000;
+            transform: translateY(-2px);
+        }
+        .platform-card .icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .platform-card h3 {
+            font-size: 0.95rem;
+            color: #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .platform-card p {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.3rem;
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+            margin: 2rem 0;
+        }
+        .stat { text-align: center; }
+        .stat .num {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #cc0000;
+        }
+        .stat .label {
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid #222;
+            padding: 2rem;
+            text-align: center;
+            color: #555;
+            font-size: 0.8rem;
+            line-height: 2;
+        }
+        footer a { color: #888; }
+        footer a:hover { color: #cc0000; }
+        footer .footer-links { margin-bottom: 0.5rem; }
+        footer .footer-links a { margin: 0 0.75rem; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 3rem; letter-spacing: 6px; }
+            .hero .tagline { font-size: 1.2rem; }
+            nav { flex-direction: column; padding: 0.5rem 1rem; }
+            nav ul { padding-bottom: 0.5rem; }
+            .stats { gap: 1.5rem; }
+        }
+        @media (max-width: 480px) {
+            .hero h1 { font-size: 2.2rem; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">DOOM</div>
+        <ul>
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="play.html">Play</a></li>
+            <li><a href="ports.html">Ports</a></li>
+            <li><a href="legal.html">Legal</a></li>
+            <li><a href="https://github.com/jeisaacs/Doom" target="_blank">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="hero">
+        <h1>DOOM</h1>
+        <div class="subtitle">Multiplatform Mega-Repo</div>
+        <div class="tagline">DOOM runs on everything. Now prove it.</div>
+        <div class="hero-buttons">
+            <a href="play.html" class="btn btn-primary">Play Now</a>
+            <a href="ports.html" class="btn">View Ports</a>
+            <a href="https://github.com/jeisaacs/Doom" target="_blank" class="btn">GitHub Repo</a>
+        </div>
+    </div>
+
+    <section>
+        <h2>About the Project</h2>
+        <p class="about-text">
+            The DOOM Multiplatform Mega-Repo is a comprehensive collection of DOOM source ports
+            targeting every platform imaginable. From modern desktops to retro consoles, embedded
+            systems to web browsers -- if it has a processor, it can probably run DOOM. Built on
+            id Software's legendary GPL v2 open-source release, this repository organizes,
+            maintains, and cross-compiles DOOM for 20+ platforms.
+        </p>
+        <div class="stats">
+            <div class="stat">
+                <div class="num">20+</div>
+                <div class="label">Platforms</div>
+            </div>
+            <div class="stat">
+                <div class="num">4</div>
+                <div class="label">Tiers</div>
+            </div>
+            <div class="stat">
+                <div class="num">1993</div>
+                <div class="label">Original Release</div>
+            </div>
+            <div class="stat">
+                <div class="num">GPL v2</div>
+                <div class="label">License</div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Featured Platforms</h2>
+        <div class="platform-grid">
+            <div class="platform-card">
+                <div class="icon">&#128187;</div>
+                <h3>Windows</h3>
+                <p>Native Win32 + SDL2</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#128039;</div>
+                <h3>Linux</h3>
+                <p>X11 / Wayland / Framebuffer</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#127822;</div>
+                <h3>macOS</h3>
+                <p>Universal Binary (ARM + x86)</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#127760;</div>
+                <h3>Web / WASM</h3>
+                <p>Emscripten in your browser</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#128241;</div>
+                <h3>Android</h3>
+                <p>Touch + controller support</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#128241;</div>
+                <h3>iOS</h3>
+                <p>MFi controller support</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#127918;</div>
+                <h3>Nintendo Switch</h3>
+                <p>Homebrew via devkitPro</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#127918;</div>
+                <h3>PS Vita</h3>
+                <p>VitaSDK homebrew port</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#128290;</div>
+                <h3>Raspberry Pi</h3>
+                <p>Bare-metal &amp; Linux</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#9000;</div>
+                <h3>DOS</h3>
+                <p>The original experience</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#128736;</div>
+                <h3>STM32</h3>
+                <p>Embedded ARM Cortex-M</p>
+            </div>
+            <div class="platform-card">
+                <div class="icon">&#128218;</div>
+                <h3>RISC-V</h3>
+                <p>Educational bare-metal</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="play.html">Play</a>
+            <a href="ports.html">Ports</a>
+            <a href="legal.html">Legal</a>
+            <a href="https://github.com/jeisaacs/Doom" target="_blank">GitHub</a>
+        </div>
+        <p>DOOM is &copy; id Software. Source code released under the GNU General Public License v2.</p>
+        <p>This project is not affiliated with or endorsed by id Software or Bethesda Softworks.</p>
+    </footer>
+</body>
+</html>

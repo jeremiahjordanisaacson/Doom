@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOOM - Web Port</title>
+    <style>
+        /* ============================================================= *
+         *  DOOM-themed dark design                                      *
+         * ============================================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            color: #c0c0c0;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* -- Header --------------------------------------------------- */
+        header {
+            width: 100%;
+            background: linear-gradient(180deg, #1a0000 0%, #0a0a0a 100%);
+            border-bottom: 2px solid #8b0000;
+            padding: 16px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.4rem;
+            color: #ff2200;
+            text-shadow: 0 0 12px #ff0000, 0 0 24px #880000;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+        }
+
+        header p {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        /* -- Canvas container ----------------------------------------- */
+        #canvas-container {
+            position: relative;
+            margin: 24px auto;
+            background: #000;
+            border: 2px solid #8b0000;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.4);
+            line-height: 0;            /* remove inline gap below canvas */
+        }
+
+        canvas#canvas {
+            display: block;
+            width: 640px;
+            height: 400px;
+            image-rendering: pixelated; /* keep those crispy pixels */
+            image-rendering: crisp-edges;
+        }
+
+        /* -- Toolbar -------------------------------------------------- */
+        #toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            background: #1a1a1a;
+            color: #ff2200;
+            border: 1px solid #8b0000;
+            padding: 8px 18px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            background: #2a0a0a;
+            box-shadow: 0 0 10px rgba(255, 34, 0, 0.3);
+        }
+
+        /* -- Loading overlay ------------------------------------------ */
+        #loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: opacity 0.4s;
+        }
+
+        #loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #loading-overlay h2 {
+            color: #ff2200;
+            font-size: 1.4rem;
+            text-shadow: 0 0 8px #ff0000;
+            margin-bottom: 20px;
+            letter-spacing: 0.15em;
+        }
+
+        #progress-bar-outer {
+            width: 320px;
+            height: 18px;
+            background: #1a1a1a;
+            border: 1px solid #8b0000;
+            overflow: hidden;
+        }
+
+        #progress-bar-inner {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #8b0000, #ff2200);
+            transition: width 0.15s;
+        }
+
+        #progress-text {
+            margin-top: 8px;
+            color: #888;
+            font-size: 0.8rem;
+        }
+
+        /* -- Controls help overlay ------------------------------------ */
+        #controls-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.88);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            padding: 24px;
+        }
+
+        #controls-overlay.visible {
+            display: flex;
+        }
+
+        #controls-overlay h2 {
+            color: #ff2200;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+        }
+
+        #controls-overlay table {
+            border-collapse: collapse;
+            color: #c0c0c0;
+            font-size: 0.85rem;
+        }
+
+        #controls-overlay td {
+            padding: 4px 14px;
+        }
+
+        #controls-overlay td:first-child {
+            color: #ff2200;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        #controls-overlay .dismiss {
+            margin-top: 20px;
+            color: #888;
+            font-size: 0.75rem;
+        }
+
+        /* -- Footer --------------------------------------------------- */
+        footer {
+            margin-top: auto;
+            padding: 16px;
+            text-align: center;
+            color: #555;
+            font-size: 0.75rem;
+            border-top: 1px solid #1a1a1a;
+            width: 100%;
+        }
+
+        footer a {
+            color: #8b0000;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================= -->
+    <!--  Header                                                        -->
+    <!-- ============================================================= -->
+    <header>
+        <h1>DOOM</h1>
+        <p>Emscripten / WebAssembly Port</p>
+    </header>
+
+    <!-- ============================================================= -->
+    <!--  Canvas + overlays                                             -->
+    <!-- ============================================================= -->
+    <div id="canvas-container">
+        <canvas id="canvas" width="640" height="400"
+                oncontextmenu="event.preventDefault()"
+                tabindex="-1"></canvas>
+
+        <!-- Loading progress overlay -->
+        <div id="loading-overlay">
+            <h2>Loading DOOM &hellip;</h2>
+            <div id="progress-bar-outer">
+                <div id="progress-bar-inner"></div>
+            </div>
+            <p id="progress-text">Preparing&hellip;</p>
+        </div>
+
+        <!-- Controls help overlay (toggled by button) -->
+        <div id="controls-overlay">
+            <h2>Controls</h2>
+            <table>
+                <tr><td>Arrow Keys</td><td>Move / Turn</td></tr>
+                <tr><td>Ctrl</td><td>Fire</td></tr>
+                <tr><td>Space</td><td>Open / Use</td></tr>
+                <tr><td>Shift</td><td>Run</td></tr>
+                <tr><td>Alt</td><td>Strafe</td></tr>
+                <tr><td>1-7</td><td>Select Weapon</td></tr>
+                <tr><td>Tab</td><td>Automap</td></tr>
+                <tr><td>Esc</td><td>Menu</td></tr>
+            </table>
+            <p class="dismiss">Click anywhere or press any key to close</p>
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div id="toolbar">
+        <button class="btn" id="btn-fullscreen">Fullscreen</button>
+        <button class="btn" id="btn-controls">Controls</button>
+    </div>
+
+    <!-- ============================================================= -->
+    <!--  Footer                                                        -->
+    <!-- ============================================================= -->
+    <footer>
+        DOOM &copy; 1993 id Software. Source released under
+        <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPL v2</a>.
+        Web port built with <a href="https://emscripten.org">Emscripten</a>.
+    </footer>
+
+    <!-- ============================================================= -->
+    <!--  Emscripten Module + UI logic                                  -->
+    <!-- ============================================================= -->
+    <script>
+        /* ------------------------------------------------------------- *
+         *  Emscripten Module configuration                              *
+         * ------------------------------------------------------------- */
+        var Module = {
+            canvas: (function () {
+                return document.getElementById('canvas');
+            })(),
+
+            /* Progress callback -- drives the loading bar */
+            setStatus: function (text) {
+                var progressText = document.getElementById('progress-text');
+                var barInner    = document.getElementById('progress-bar-inner');
+                var overlay     = document.getElementById('loading-overlay');
+
+                if (!text) {
+                    /* Loading complete */
+                    overlay.classList.add('hidden');
+                    return;
+                }
+
+                progressText.textContent = text;
+
+                /* Emscripten sends strings like "Downloading data... (3/5)" */
+                var match = text.match(/(\d+)\/(\d+)/);
+                if (match) {
+                    var pct = (parseInt(match[1]) / parseInt(match[2])) * 100;
+                    barInner.style.width = pct + '%';
+                }
+            },
+
+            /* Redirect print / printErr to the browser console */
+            print: function (text) {
+                console.log('[DOOM]', text);
+            },
+            printErr: function (text) {
+                console.error('[DOOM]', text);
+            },
+
+            /* Called when the runtime is fully initialised */
+            onRuntimeInitialized: function () {
+                console.log('[DOOM] WebAssembly runtime ready.');
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('canvas').focus();
+            }
+        };
+
+        /* ------------------------------------------------------------- *
+         *  Fullscreen button                                            *
+         * ------------------------------------------------------------- */
+        document.getElementById('btn-fullscreen').addEventListener('click', function () {
+            var container = document.getElementById('canvas-container');
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            }
+        });
+
+        /* Scale canvas when entering / leaving fullscreen */
+        document.addEventListener('fullscreenchange', function () {
+            var canvas = document.getElementById('canvas');
+            if (document.fullscreenElement) {
+                canvas.style.width  = '100vw';
+                canvas.style.height = '100vh';
+                canvas.style.objectFit = 'contain';
+            } else {
+                canvas.style.width  = '640px';
+                canvas.style.height = '400px';
+                canvas.style.objectFit = '';
+            }
+        });
+
+        /* ------------------------------------------------------------- *
+         *  Controls overlay                                             *
+         * ------------------------------------------------------------- */
+        var controlsOverlay = document.getElementById('controls-overlay');
+
+        document.getElementById('btn-controls').addEventListener('click', function () {
+            controlsOverlay.classList.toggle('visible');
+        });
+
+        controlsOverlay.addEventListener('click', function () {
+            controlsOverlay.classList.remove('visible');
+        });
+
+        document.addEventListener('keydown', function () {
+            controlsOverlay.classList.remove('visible');
+        });
+
+        /* ------------------------------------------------------------- *
+         *  Prevent default browser behaviour for game keys              *
+         * ------------------------------------------------------------- */
+        window.addEventListener('keydown', function (e) {
+            /* Prevent arrow keys, space, tab from scrolling / tabbing */
+            if ([32, 37, 38, 39, 40, 9].indexOf(e.keyCode) !== -1) {
+                if (document.activeElement === document.getElementById('canvas')) {
+                    e.preventDefault();
+                }
+            }
+        });
+    </script>
+
+    <!-- Emscripten-generated JS is injected here -->
+    {{{ SCRIPT }}}
+
+</body>
+</html>

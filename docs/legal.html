@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Legal - DOOM Multiplatform Mega-Repo</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        a { color: #cc0000; text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #ff3333; }
+
+        /* Nav */
+        nav {
+            background: #111;
+            border-bottom: 2px solid #cc0000;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #cc0000;
+            padding: 0.75rem 0;
+            letter-spacing: 4px;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+        }
+        nav ul li a {
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.75rem 0;
+            display: inline-block;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        nav ul li a:hover, nav ul li a.active {
+            color: #cc0000;
+            border-bottom-color: #cc0000;
+        }
+
+        /* Page header */
+        .page-header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            background: linear-gradient(180deg, #1a0000 0%, #0a0a0a 100%);
+            border-bottom: 1px solid #222;
+        }
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #cc0000;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            text-shadow: 0 0 20px rgba(204,0,0,0.4);
+        }
+        .page-header p { color: #888; margin-top: 0.5rem; }
+
+        /* Content */
+        .content {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .content section {
+            margin-bottom: 3rem;
+        }
+        .content h2 {
+            font-size: 1.4rem;
+            color: #cc0000;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #222;
+        }
+        .content h3 {
+            font-size: 1.1rem;
+            color: #ccc;
+            margin: 1.5rem 0 0.75rem;
+        }
+        .content p {
+            color: #bbb;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+        .content ul {
+            margin: 0.5rem 0 1rem 1.5rem;
+            color: #bbb;
+            font-size: 0.95rem;
+        }
+        .content ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .license-box {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+            color: #999;
+            line-height: 1.8;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .license-box::-webkit-scrollbar { width: 6px; }
+        .license-box::-webkit-scrollbar-track { background: #111; }
+        .license-box::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        .callout {
+            background: #1a1a1a;
+            border-left: 3px solid #cc0000;
+            border-radius: 0 4px 4px 0;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+            color: #bbb;
+        }
+        .callout strong { color: #cc0000; }
+
+        .callout.warning {
+            border-left-color: #f59e0b;
+        }
+        .callout.warning strong { color: #f59e0b; }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid #222;
+            padding: 2rem;
+            text-align: center;
+            color: #555;
+            font-size: 0.8rem;
+            line-height: 2;
+            margin-top: 2rem;
+        }
+        footer a { color: #888; }
+        footer a:hover { color: #cc0000; }
+        footer .footer-links { margin-bottom: 0.5rem; }
+        footer .footer-links a { margin: 0 0.75rem; }
+
+        @media (max-width: 768px) {
+            nav { flex-direction: column; padding: 0.5rem 1rem; }
+            nav ul { padding-bottom: 0.5rem; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+            .page-header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">DOOM</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="play.html">Play</a></li>
+            <li><a href="ports.html">Ports</a></li>
+            <li><a href="legal.html" class="active">Legal</a></li>
+            <li><a href="https://github.com/jeisaacs/Doom" target="_blank">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-header">
+        <h1>Legal Information</h1>
+        <p>Licensing, attribution, and WAD file policy</p>
+    </div>
+
+    <div class="content">
+
+        <section>
+            <h2>GNU General Public License v2</h2>
+            <p>
+                The DOOM source code was released by id Software on December 23, 1997, under the
+                GNU General Public License, version 2. All source code in this repository derived
+                from the original DOOM source code is licensed under GPL v2. Any modifications and
+                platform-specific port code contributed to this repository are also released under
+                GPL v2 unless otherwise noted.
+            </p>
+            <div class="callout">
+                <strong>What this means:</strong> You are free to use, modify, and redistribute
+                the source code, provided that any derivative works are also distributed under the
+                GPL v2. You must include the full license text and make the source code available
+                when distributing binaries.
+            </div>
+            <div class="license-box">
+                <p>GNU GENERAL PUBLIC LICENSE<br>Version 2, June 1991</p>
+                <p>Copyright (C) 1989, 1991 Free Software Foundation, Inc.<br>
+                51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA</p>
+                <p>Everyone is permitted to copy and distribute verbatim copies of this license
+                document, but changing it is not allowed.</p>
+                <br>
+                <p>PREAMBLE</p>
+                <p>The licenses for most software are designed to take away your freedom to share
+                and change it. By contrast, the GNU General Public License is intended to guarantee
+                your freedom to share and change free software -- to make sure the software is free
+                for all its users. This General Public License applies to most of the Free Software
+                Foundation's software and to any other program whose authors commit to using it.
+                (Some other Free Software Foundation software is covered by the GNU Lesser General
+                Public License instead.) You can apply it to your programs, too.</p>
+                <p>When we speak of free software, we are referring to freedom, not price. Our
+                General Public Licenses are designed to make sure that you have the freedom to
+                distribute copies of free software (and charge for this service if you wish), that
+                you receive source code or can get it if you want it, that you can change the
+                software or use pieces of it in new free programs; and that you know you can do
+                these things.</p>
+                <p>...</p>
+                <p>The full text of the GPL v2 is available at:<br>
+                <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" target="_blank">
+                https://www.gnu.org/licenses/old-licenses/gpl-2.0.html</a></p>
+            </div>
+        </section>
+
+        <section>
+            <h2>WAD File Policy</h2>
+            <p>
+                WAD files contain the game data (levels, textures, sprites, sounds, music) and are
+                separate from the source code. The WAD files are <strong>not</strong> covered by the
+                GPL and have their own distribution rules.
+            </p>
+
+            <h3>Shareware WAD (DOOM1.WAD)</h3>
+            <p>
+                The DOOM shareware WAD (DOOM1.WAD) contains Episode 1: "Knee-Deep in the Dead" and
+                may be freely distributed. This is the WAD used by the web player on this site. You
+                can obtain it from numerous sources online, or from the
+                <a href="https://doomwiki.org/wiki/DOOM1.WAD" target="_blank">Doom Wiki</a>.
+            </p>
+
+            <h3>Registered / Commercial WADs</h3>
+            <div class="callout warning">
+                <strong>Warning:</strong> The full registered DOOM WAD (DOOM.WAD), DOOM II WAD
+                (DOOM2.WAD), and other commercial WADs (TNT.WAD, PLUTONIA.WAD) are commercial
+                products owned by id Software / ZeniMax Media / Microsoft. They may <strong>not</strong>
+                be freely distributed. You must purchase a legitimate copy to use them.
+            </div>
+            <p>
+                Commercial WADs can be legally obtained from:
+            </p>
+            <ul>
+                <li><a href="https://store.steampowered.com/app/2280/DOOM_1993/" target="_blank">Steam</a></li>
+                <li><a href="https://www.gog.com/game/doom_1993" target="_blank">GOG.com</a></li>
+                <li>Physical copies (original floppy disks or CD-ROMs)</li>
+            </ul>
+            <p>
+                This repository does <strong>not</strong> include any commercial WAD files and never
+                will. Do not submit pull requests containing commercial WAD data.
+            </p>
+
+            <h3>Free / Community WADs</h3>
+            <p>
+                Community-created WADs and total conversions (such as
+                <a href="https://freedoom.github.io/" target="_blank">Freedoom</a>) that are
+                released under open-source or free-content licenses may be used freely with these
+                source ports. Freedoom provides a complete set of IWAD files that are compatible
+                with the DOOM engine and are released under a BSD-style license.
+            </p>
+        </section>
+
+        <section>
+            <h2>Attribution</h2>
+            <p>This project owes its existence to the work of many individuals and organizations:</p>
+            <ul>
+                <li><strong>id Software</strong> -- Original DOOM development and GPL source release.
+                    John Carmack, John Romero, Dave Taylor, and the entire id team.</li>
+                <li><strong>The DOOM Community</strong> -- Decades of source port development,
+                    modding, research, and documentation.</li>
+                <li><strong>Chocolate Doom</strong> -- Simon Howard's faithful vanilla-compatible
+                    source port, which serves as a reference for accuracy.</li>
+                <li><strong>Crispy Doom</strong> -- Fabian Greffrath's enhanced fork of Chocolate
+                    Doom with limit-removing features.</li>
+                <li><strong>Doom Wiki</strong> -- The definitive reference for all things DOOM.</li>
+                <li><strong>devkitPro</strong> -- Toolchains for homebrew development on Nintendo
+                    platforms.</li>
+                <li><strong>VitaSDK</strong> -- Open-source toolchain for PS Vita homebrew.</li>
+                <li><strong>Emscripten</strong> -- LLVM-to-WebAssembly compiler enabling the web port.</li>
+                <li><strong>SDL (Simple DirectMedia Layer)</strong> -- Cross-platform multimedia
+                    library used by most desktop ports.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Trademarks</h2>
+            <p>
+                DOOM, id Software, and related logos are trademarks or registered trademarks of
+                id Software LLC, a ZeniMax Media company, now part of Microsoft. This project is an
+                independent open-source effort and is not affiliated with, endorsed by, or sponsored
+                by id Software, ZeniMax Media, Bethesda Softworks, or Microsoft.
+            </p>
+            <p>
+                All other trademarks, platform names, and product names mentioned on this site are
+                the property of their respective owners. The use of these names is for
+                identification purposes only and does not imply endorsement.
+            </p>
+        </section>
+
+        <section>
+            <h2>Contributing</h2>
+            <p>
+                By contributing code to this repository, you agree that your contributions will be
+                licensed under the GNU General Public License v2. You must have the right to submit
+                the code under this license. Do not submit code that is proprietary, copyrighted by
+                a third party without permission, or encumbered by patents.
+            </p>
+            <p>
+                Do not submit commercial WAD files, proprietary SDK headers, or any content you do
+                not have the right to distribute under an open-source license.
+            </p>
+        </section>
+
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="play.html">Play</a>
+            <a href="ports.html">Ports</a>
+            <a href="legal.html">Legal</a>
+            <a href="https://github.com/jeisaacs/Doom" target="_blank">GitHub</a>
+        </div>
+        <p>DOOM is &copy; id Software. Source code released under the GNU General Public License v2.</p>
+        <p>This project is not affiliated with or endorsed by id Software or Bethesda Softworks.</p>
+    </footer>
+</body>
+</html>

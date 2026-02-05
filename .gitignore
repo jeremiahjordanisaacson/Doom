@@ -1,0 +1,56 @@
+# Build output
+build/
+build-*/
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.wasm
+*.data
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Android
+ports/android/.gradle/
+ports/android/app/build/
+ports/android/build/
+ports/android/local.properties
+ports/android/bin/
+ports/android/libs/armeabi/
+*.apk
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Emscripten cache
+.emscripten_cache/
+
+# Compiled objects in legacy locations
+Java---Android---Doom/native/prboom/POSIX/*.o
+Java---Android---Doom/native/prboom/POSIX/*.a
+Java---Android---Doom/native/prboom/SDL/*.a
+Java---Android---Doom/native/prboom/prboom
+Java---Android---Doom/native/prboom/prboom-game-server
+Java---Android---Doom/native/prboom/tic
+engine/POSIX/*.o
+engine/POSIX/*.a
+engine/SDL/*.a
+
+# Secrets
+.env
+*.keystore
+credentials.json

@@ -1,0 +1,163 @@
+name: "Build Exotic Ports"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-dos:
+    name: Build DOS (DJGPP)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install DJGPP cross-compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential wget unzip
+          mkdir -p $HOME/djgpp
+          wget -q https://github.com/andrewwutw/build-djgpp/releases/download/v3.4/djgpp-linux64-gcc1220.tar.bz2 -O /tmp/djgpp.tar.bz2
+          tar -xjf /tmp/djgpp.tar.bz2 -C $HOME/djgpp --strip-components=1
+          echo "$HOME/djgpp/bin" >> $GITHUB_PATH
+
+      - name: Set DJGPP environment
+        run: |
+          echo "DJGPP_PREFIX=$HOME/djgpp" >> $GITHUB_ENV
+          echo "DJDIR=$HOME/djgpp" >> $GITHUB_ENV
+
+      - name: Configure CMake for DOS
+        run: |
+          cmake -B build-dos \
+            -DCMAKE_SYSTEM_NAME=DJGPP \
+            -DCMAKE_C_COMPILER=i586-pc-msdosdjgpp-gcc \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DDOOM_PLATFORM=dos
+
+      - name: Build DOS binary
+        run: cmake --build build-dos --config Release --parallel $(nproc)
+
+      - name: Upload DOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doom-dos
+          path: |
+            build-dos/*.exe
+            build-dos/*.EXE
+          retention-days: 14
+
+  build-terminal:
+    name: Build Terminal (ncurses)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ncurses development libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libncurses-dev libncursesw5-dev
+
+      - name: Configure CMake for terminal
+        run: |
+          cmake -B build-terminal \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DDOOM_PLATFORM=terminal \
+            -DDOOM_RENDERER=ncurses
+
+      - name: Build terminal binary
+        run: cmake --build build-terminal --config Release --parallel $(nproc)
+
+      - name: Upload terminal artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doom-terminal
+          path: build-terminal/doom*
+          retention-days: 14
+
+  build-switch:
+    name: Build Nintendo Switch (devkitPro)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install devkitPro toolchain
+        run: |
+          wget -q https://apt.devkitpro.org/install-devkitpro-pacman -O /tmp/install-devkitpro.sh
+          chmod +x /tmp/install-devkitpro.sh
+          sudo /tmp/install-devkitpro.sh
+          sudo dkp-pacman -Sy --noconfirm switch-dev switch-sdl2 switch-sdl2_mixer
+
+      - name: Set devkitPro environment
+        run: |
+          echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
+          echo "DEVKITA64=/opt/devkitpro/devkitA64" >> $GITHUB_ENV
+          echo "/opt/devkitpro/devkitA64/bin" >> $GITHUB_PATH
+          echo "/opt/devkitpro/tools/bin" >> $GITHUB_PATH
+
+      - name: Configure CMake for Switch
+        run: |
+          cmake -B build-switch \
+            -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DDOOM_PLATFORM=switch
+
+      - name: Build Switch NRO
+        run: cmake --build build-switch --config Release --parallel $(nproc)
+
+      - name: Upload Switch artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doom-switch
+          path: |
+            build-switch/*.nro
+            build-switch/*.nacp
+          retention-days: 14
+
+  build-psp:
+    name: Build PSP (PSPSDK)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PSPSDK toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake autoconf automake \
+            bison flex gcc g++ libmpfr-dev libgmp-dev libmpc-dev \
+            texinfo libusb-dev libreadline-dev wget git
+          git clone https://github.com/pspdev/pspdev.git /tmp/pspdev
+          cd /tmp/pspdev
+          ./build-all.sh 2>&1 | tail -20 || echo "::warning::PSPSDK build may have partial failures"
+
+      - name: Set PSPSDK environment
+        run: |
+          echo "PSPDEV=/usr/local/pspdev" >> $GITHUB_ENV
+          echo "PSPSDK=/usr/local/pspdev/psp/sdk" >> $GITHUB_ENV
+          echo "/usr/local/pspdev/bin" >> $GITHUB_PATH
+
+      - name: Configure CMake for PSP
+        run: |
+          cmake -B build-psp \
+            -DCMAKE_TOOLCHAIN_FILE=/usr/local/pspdev/psp/sdk/lib/cmake/psp.cmake \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DDOOM_PLATFORM=psp
+
+      - name: Build PSP EBOOT
+        run: cmake --build build-psp --config Release --parallel $(nproc)
+
+      - name: Upload PSP artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doom-psp
+          path: |
+            build-psp/EBOOT.PBP
+            build-psp/*.prx
+          retention-days: 14

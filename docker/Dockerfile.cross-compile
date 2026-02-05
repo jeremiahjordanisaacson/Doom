@@ -1,0 +1,114 @@
+# =============================================================================
+# Dockerfile.cross-compile - Multi-Platform Cross-Compilation for DOOM
+# =============================================================================
+# Supports building DOOM for:
+#   - linux-x86_64  (native)
+#   - linux-arm     (ARM cross-compile via gcc-arm-linux-gnueabihf)
+#   - windows       (MinGW cross-compile via gcc-mingw-w64)
+#
+# Usage:
+#   docker build -f docker/Dockerfile.cross-compile -t doom-cross .
+#   docker run doom-cross                          # builds all targets
+#   docker run doom-cross /doom/build.sh linux-x86_64
+# =============================================================================
+
+FROM ubuntu:22.04
+
+LABEL maintainer="DOOM Multiplatform Mega-Repo"
+LABEL description="Cross-compilation environment for DOOM desktop targets"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Enable i386 architecture for 32-bit SDL2 libraries
+RUN dpkg --add-architecture i386
+
+# Install native and cross-compilation toolchains
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    # ARM cross-compiler
+    gcc-arm-linux-gnueabihf \
+    g++-arm-linux-gnueabihf \
+    crossbuild-essential-armhf \
+    # MinGW cross-compiler for Windows
+    gcc-mingw-w64 \
+    g++-mingw-w64 \
+    # SDL2 development libraries
+    libsdl2-dev \
+    libsdl2-mixer-dev \
+    libsdl2-net-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /doom
+
+# Copy the entire project tree
+COPY . .
+
+# Create the cross-compilation build script
+RUN cat > /doom/build.sh << 'BUILDSCRIPT'
+#!/bin/bash
+set -e
+
+BUILD_DIR="/doom/build-output"
+mkdir -p "$BUILD_DIR"
+
+build_linux_x86_64() {
+    echo "=== Building for linux-x86_64 ==="
+    cmake -B build-linux-x86_64 \
+        -DCMAKE_BUILD_TYPE=Release \
+        ports/desktop
+    cmake --build build-linux-x86_64 --parallel $(nproc)
+    cp -r build-linux-x86_64 "$BUILD_DIR/linux-x86_64"
+    echo "=== linux-x86_64 build complete ==="
+}
+
+build_linux_arm() {
+    echo "=== Building for linux-arm ==="
+    cmake -B build-linux-arm \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_COMPILER=arm-linux-gnueabihf-gcc \
+        -DCMAKE_CXX_COMPILER=arm-linux-gnueabihf-g++ \
+        -DCMAKE_SYSTEM_NAME=Linux \
+        -DCMAKE_SYSTEM_PROCESSOR=arm \
+        ports/desktop
+    cmake --build build-linux-arm --parallel $(nproc)
+    cp -r build-linux-arm "$BUILD_DIR/linux-arm"
+    echo "=== linux-arm build complete ==="
+}
+
+build_windows() {
+    echo "=== Building for windows (MinGW) ==="
+    cmake -B build-windows \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_C_COMPILER=x86_64-w64-mingw32-gcc \
+        -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+        -DCMAKE_SYSTEM_NAME=Windows \
+        ports/desktop
+    cmake --build build-windows --parallel $(nproc)
+    cp -r build-windows "$BUILD_DIR/windows"
+    echo "=== windows build complete ==="
+}
+
+if [ $# -eq 0 ]; then
+    echo "Building all desktop targets..."
+    build_linux_x86_64
+    build_linux_arm
+    build_windows
+    echo "All builds complete. Output in $BUILD_DIR"
+else
+    for target in "$@"; do
+        case "$target" in
+            linux-x86_64) build_linux_x86_64 ;;
+            linux-arm)    build_linux_arm ;;
+            windows)      build_windows ;;
+            *)            echo "Unknown target: $target"; exit 1 ;;
+        esac
+    done
+fi
+BUILDSCRIPT
+
+RUN chmod +x /doom/build.sh
+
+# Build all desktop targets by default
+CMD ["/doom/build.sh"]

@@ -1,0 +1,97 @@
+name: "Build Desktop"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+
+jobs:
+  build-desktop:
+    name: Build Desktop (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            artifact-name: doom-linux
+            binary-ext: ""
+            archive-cmd: tar -czf doom-linux.tar.gz -C build doom
+            archive-name: doom-linux.tar.gz
+          - os: windows-latest
+            artifact-name: doom-windows
+            binary-ext: ".exe"
+            archive-cmd: Compress-Archive -Path build/Release/* -DestinationPath doom-windows.zip
+            archive-name: doom-windows.zip
+          - os: macos-latest
+            artifact-name: doom-macos
+            binary-ext: ""
+            archive-cmd: tar -czf doom-macos.tar.gz -C build doom
+            archive-name: doom-macos.tar.gz
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install SDL2 (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libsdl2-dev \
+            libsdl2-mixer-dev \
+            libsdl2-net-dev \
+            libsdl2-image-dev
+
+      - name: Install SDL2 (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install \
+            sdl2 \
+            sdl2_mixer \
+            sdl2_net \
+            sdl2_image
+
+      - name: Install SDL2 (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install sdl2 --yes
+          choco install sdl2_mixer --yes
+          choco install sdl2_net --yes
+          choco install sdl2_image --yes
+
+      - name: Configure CMake
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DDOOM_PLATFORM=desktop
+
+      - name: Build
+        run: cmake --build build --config Release --parallel
+
+      - name: Create archive (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: ${{ matrix.archive-cmd }}
+
+      - name: Create archive (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ${{ matrix.archive-cmd }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.archive-name }}
+          retention-days: 14
+
+      - name: Attach binary to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.archive-name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

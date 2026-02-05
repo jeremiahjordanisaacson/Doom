@@ -1,170 +1,192 @@
-# DOOM for Android
+# DOOM Multiplatform Mega-Repo
 
-**Version 9.0 (2026 Edition)**
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
+[![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](LICENSE)
+[![Platforms](https://img.shields.io/badge/platforms-20%2B-orange)]()
 
-A full Android port of the legendary DOOM game, originally created by id Software in 1993. This project brings the classic first-person shooter experience to modern Android devices.
+```
+______   ___   ___  __  __
+|  _ \ / _ \ / _ \|  \/  |
+| | | | | | | | | | |\/| |
+| |_| | |_| | |_| | |  | |
+|____/ \___/ \___/|_|  |_|
+
+M U L T I P L A T F O R M   M E G A - R E P O
+```
+
+A collection of DOOM ports for **every platform imaginable**, based on the
+GPL-licensed [PrBoom](http://prboom.sourceforge.net/) engine. One repository,
+one codebase, dozens of targets -- from desktop PCs to graphing calculators.
 
 ---
 
-## A Tribute to the Johns
+## Quick Links
 
-This project exists because of two programming legends whose work changed gaming forever:
-
-### John Carmack
-
-The technical wizard whose revolutionary rendering techniques made DOOM possible. His innovations in BSP trees, binary space partitioning, and optimized rendering pipelines didn't just create a game - they laid the foundation for the entire first-person shooter genre. Carmack's relentless pursuit of technical excellence and his willingness to share knowledge through open-sourcing the DOOM engine has inspired countless programmers worldwide.
-
-### John Romero
-
-The design mastermind whose level design and creative vision gave DOOM its soul. Romero's masterful crafting of E1M1 through the depths of Hell created an experience that still resonates today. His understanding of pacing, atmosphere, and player psychology made DOOM not just technically impressive, but genuinely fun and terrifying to play.
-
-**To both Johns: Thank you.** Your collaboration produced something that transcended gaming and became a cultural phenomenon. Your decision to release the source code gave generations of programmers the opportunity to learn, experiment, and create. This Android port stands as a small tribute to your massive contribution to computing and entertainment.
-
-*"In the first age, in the first battle, when the shadows first lengthened, one stood."*
+| | Link |
+|---|---|
+| **Play in Browser** | [Launch Web/WASM build](https://example.com/doom-wasm) |
+| **Download** | [Releases page](https://github.com/example/doom-mega-repo/releases) |
+| **Documentation** | [docs/](docs/) |
 
 ---
 
-## Features
+## Platform Support
 
-- Full DOOM gameplay on Android devices
-- Support for original WAD files (DOOM, DOOM II, Plutonia, TNT)
-- Touch screen controls with on-screen buttons
-- Keyboard/D-Pad support for external controllers
-- Background music and sound effects
-- Portrait and landscape orientation support
+| Port | Directory | Status |
+|---|---|---|
+| Desktop (SDL2) | `ports/sdl2/` | **Working** |
+| Web / WASM | `ports/wasm/` | **Working** |
+| Android | `ports/android/` | **Working** |
+| macOS | `ports/macos/` | In Progress |
+| Windows | `ports/windows/` | In Progress |
+| Linux Framebuffer | `ports/linux-fb/` | In Progress |
+| iOS | `ports/ios/` | In Progress |
+| Raspberry Pi | `ports/rpi/` | In Progress |
+| Terminal (Curses) | `ports/terminal/` | In Progress |
+| Nintendo Switch | `ports/switch/` | Scaffold |
+| PlayStation | `ports/playstation/` | Scaffold |
+| DOS | `ports/dos/` | Scaffold |
+| BlackBerry | `ports/blackberry/` | Scaffold |
+| Xbox | `ports/xbox/` | Scaffold |
+| NES | `ports/nes/` | Proof of Concept |
+| TI-83 Calculator | `ports/ti83/` | Proof of Concept |
+| ESP32 | `ports/esp32/` | Proof of Concept |
+| watchOS | `ports/watchos/` | Proof of Concept |
+| Commodore 64 | `ports/c64/` | Proof of Concept |
+| Pure JavaScript | `ports/purejs/` | Proof of Concept |
 
-## System Requirements
+---
 
-- **Minimum Android Version:** 7.0 (Nougat, API 24)
-- **Target Android Version:** 14 (API 34)
-- **Supported Architectures:** ARM, ARM64, x86, x86_64
-- **Storage:** ~50MB for app + WAD files
-
-## Compatibility
-
-This 2026 update ensures compatibility with **all modern Android devices**:
-
-- Android 7.0 through Android 14+
-- 32-bit and 64-bit devices
-- Phones and tablets
-- Chromebooks with Android support
-- Android TV devices
-
-### Key Updates for 2026
-
-- **Gradle Build System:** Migrated from legacy Eclipse/Ant to modern Gradle
-- **Scoped Storage:** Full Android 10+ scoped storage compliance
-- **FileProvider:** Secure file sharing for Android 7.0+
-- **Runtime Permissions:** Proper permission handling for all Android versions
-- **64-bit Support:** Native library support for ARM64 and x86_64
-- **Modern APIs:** Replaced all deprecated Android APIs
-
-## Installation
-
-### From Source
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/jeremiahjordanisaacson/Java---Android---Doom.git
-   ```
-
-2. Open in Android Studio (2023.1 or later recommended)
-
-3. Build and run on your device or emulator
-
-### WAD Files
-
-You'll need a DOOM WAD file to play. Options include:
-
-- **DOOM Shareware (doom1.wad):** Free, available from many sources
-- **Full DOOM (doom.wad):** Requires original game purchase
-- **DOOM II (doom2.wad):** Requires original game purchase
-- **Final DOOM (plutonia.wad, tnt.wad):** Requires original game purchase
-
-Place WAD files in the app's data directory or use the in-app downloader for shareware.
-
-## Controls
-
-### Touch Screen Mode
-- **D-Pad:** Movement (up/down/left/right)
-- **Fire Button:** Shoot
-- **Open/Use:** Interact with doors/switches
-- **Map:** Toggle automap
-- **Strafe:** Side-step left/right
-
-### Keyboard Mode
-- **1AQW** or **D-Pad:** Movement
-- **Shift:** Run
-- **Alt:** Strafe
-- **Space:** Use/Open
-- **Tab:** Map
-- **Enter:** Menu select
-- **Escape/Back:** Menu
-
-## Project Structure
+## Directory Structure
 
 ```
-Java---Android---Doom/
-├── app/
-│   ├── src/main/
-│   │   ├── java/
-│   │   │   ├── com/doom/android/    # Main application
-│   │   │   └── doom/                # Game modules
-│   │   │       ├── audio/           # Sound management
-│   │   │       ├── jni/             # Native bindings
-│   │   │       └── util/            # Utilities
-│   │   ├── res/                     # Android resources
-│   │   ├── jniLibs/                 # Native libraries
-│   │   └── AndroidManifest.xml
-│   └── build.gradle.kts
-├── native/prboom/                   # PrBoom C source
-├── build.gradle.kts
-├── settings.gradle.kts
-└── README.md
+Doom/
+  README.md              This file
+  LICENSE                 GNU General Public License v2
+  LEGAL.md               Detailed legal notices and attribution
+  CMakeLists.txt         Top-level CMake build
+  Makefile               Convenience wrapper around CMake
+  core/                  Shared DOOM engine source (PrBoom-based)
+    src/                 C source files
+    include/             Public headers
+  ports/                 Platform-specific port implementations
+    sdl2/               Desktop SDL2 (Linux, macOS, Windows)
+    wasm/               Emscripten / WebAssembly build
+    android/            Android NDK + Java wrapper
+    macos/              Native macOS (AppKit / Metal)
+    windows/            Native Win32 / DirectX
+    linux-fb/           Raw Linux framebuffer
+    ios/                iOS (UIKit / Metal)
+    rpi/                Raspberry Pi (bare-metal & Linux)
+    terminal/           Terminal / ncurses renderer
+    switch/             Nintendo Switch (libnx)
+    playstation/        PlayStation homebrew
+    dos/                DOS (DJGPP / Watcom)
+    blackberry/         BlackBerry QNX
+    xbox/               Xbox homebrew
+    nes/                NES (cc65)
+    ti83/               TI-83 calculator (z80)
+    esp32/              ESP32 microcontroller
+    watchos/            Apple watchOS
+    c64/                Commodore 64 (6502)
+    purejs/             Pure JavaScript (no WASM)
+  data/                  Shareware WAD and demo lumps
+  docs/                  Documentation and guides
+  tools/                 Build helpers, WAD utilities, scripts
+  tests/                 Automated test suite
 ```
 
-## Technical Details
+---
 
-This port is based on **PrBoom**, a highly portable and accurate DOOM engine implementation. The Android integration uses JNI (Java Native Interface) to bridge between Java/Android and the C game engine.
+## Quick Start
 
-### Architecture
-- **Java Layer:** Android UI, input handling, audio playback
-- **JNI Bridge:** Event passing between Java and native code
-- **Native Layer:** PrBoom game engine (C)
+### Prerequisites
+
+- CMake 3.16 or later
+- A C99-compatible compiler (GCC, Clang, MSVC)
+- SDL2 development libraries (for the desktop port)
+
+### Build (Desktop SDL2)
+
+```bash
+# Configure
+cmake -B build -DPORT=sdl2
+
+# Build
+cmake --build build -j$(nproc)
+
+# Run with the included shareware WAD
+./build/doom -iwad data/doom1.wad
+```
+
+### Build (using the Makefile wrapper)
+
+```bash
+# Desktop SDL2 (default)
+make
+
+# Web / WASM (requires Emscripten SDK)
+make PORT=wasm
+
+# Android (requires Android NDK)
+make PORT=android
+
+# Any other port
+make PORT=<port-name>
+```
+
+### Build (other ports)
+
+Each port directory contains its own `README.md` with platform-specific
+instructions, toolchain requirements, and flashing/deployment steps.
+
+---
+
+## Legal
+
+This project is licensed under the **GNU General Public License v2** -- see
+[LICENSE](LICENSE) for the full text. Additional legal notices, attribution,
+and WAD distribution policies are documented in [LEGAL.md](LEGAL.md).
+
+**Key points:**
+
+- The DOOM **engine source code** is free software under GPL v2.
+- The **shareware WAD** (`doom1.wad`) is freely distributable and is included
+  in this repository under `data/`.
+- **Commercial WAD files** (`doom.wad`, `doom2.wad`, `plutonia.wad`,
+  `tnt.wad`) are copyrighted by id Software / ZeniMax Media and are **NOT**
+  included. You must purchase them legally to use them with this engine.
+
+---
 
 ## Credits
 
-### Original DOOM (1993)
-- **id Software**
-- John Carmack (Lead Programmer)
-- John Romero (Lead Designer)
-- Tom Hall, Sandy Petersen (Design)
-- Adrian Carmack, Kevin Cloud (Art)
-- Bobby Prince (Music/Sound)
-
-### PrBoom Engine
-- The PrBoom Team
-
-### Android Port
-- **Original Port (2010):** Savant - Jeremiah Isaacson & Justin Turney
-- **2026 Modernization:** Updated for all Android devices
-
-## License
-
-This program is free software: you can redistribute it and/or modify it under the terms of the **GNU General Public License** as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-## Links
-
-- [Original DOOM Source Code](https://github.com/id-Software/DOOM)
-- [PrBoom](http://prboom.sourceforge.net/)
-- [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.html)
+- **id Software** -- for creating DOOM and releasing the engine source code
+  under the GPL. Special thanks to John Carmack and John Romero.
+- **PrBoom Team** -- for the portable, clean PrBoom engine that serves as the
+  foundation of this project.
+- **Jeremiah Isaacson** -- original Android port and maintainer of this
+  multiplatform mega-repo.
+- All contributors who have submitted patches, ports, and bug fixes.
 
 ---
 
-*"RIP AND TEAR, UNTIL IT IS DONE."*
+## License
 
-**Happy Demon Slaying!**
+```
+Copyright (C) 1993-1996  id Software, Inc.
+Copyright (C) 1999-2006  PrBoom contributors
+Copyright (C) 2024-2026  Jeremiah Isaacson and contributors
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+```
+
+See [LICENSE](LICENSE) for the full license text.

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Internal app files -->
+    <files-path name="internal_files" path="." />
+
+    <!-- Cache directory -->
+    <cache-path name="cache" path="." />
+
+    <!-- External files directory (app-specific) -->
+    <external-files-path name="external_files" path="." />
+
+    <!-- External cache directory -->
+    <external-cache-path name="external_cache" path="." />
+
+    <!-- External storage for game WAD files and sounds -->
+    <external-path name="doom_files" path="doom/" />
+    <external-path name="download" path="Download/" />
+</paths>

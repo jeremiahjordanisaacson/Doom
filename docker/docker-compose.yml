@@ -1,0 +1,65 @@
+# =============================================================================
+# docker-compose.yml - DOOM Multiplatform Mega-Repo Build Services
+# =============================================================================
+# Services:
+#   web-build       - Build and serve the Web/WASM port
+#   cross-compile   - Cross-compile for linux-x86_64, linux-arm, windows
+#   dev             - Interactive development environment with SDL2
+#
+# Usage:
+#   docker compose up web-build          # build + serve WASM port on :8080
+#   docker compose run cross-compile     # build all desktop targets
+#   docker compose run dev bash          # interactive dev shell
+# =============================================================================
+
+version: "3.8"
+
+services:
+  # ---------------------------------------------------------------------------
+  # Web/WASM build and dev server
+  # ---------------------------------------------------------------------------
+  web-build:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.emscripten
+    ports:
+      - "8080:8080"
+    volumes:
+      - web-output:/doom/build-web
+
+  # ---------------------------------------------------------------------------
+  # Cross-compilation for desktop platforms
+  # ---------------------------------------------------------------------------
+  cross-compile:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.cross-compile
+    volumes:
+      - build-output:/doom/build-output
+
+  # ---------------------------------------------------------------------------
+  # Interactive development environment
+  # ---------------------------------------------------------------------------
+  dev:
+    image: ubuntu:22.04
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - DISPLAY=${DISPLAY:-}
+    volumes:
+      - ../:/doom
+      - build-output:/doom/build-output
+    working_dir: /doom
+    entrypoint: >
+      bash -c "
+        apt-get update &&
+        apt-get install -y --no-install-recommends
+          build-essential cmake git
+          libsdl2-dev libsdl2-mixer-dev libsdl2-net-dev &&
+        exec bash
+      "
+    stdin_open: true
+    tty: true
+
+volumes:
+  web-output:
+  build-output:

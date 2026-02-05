@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Ports - DOOM Multiplatform Mega-Repo</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', Courier, monospace;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        a { color: #cc0000; text-decoration: none; transition: color 0.2s; }
+        a:hover { color: #ff3333; }
+
+        /* Nav */
+        nav {
+            background: #111;
+            border-bottom: 2px solid #cc0000;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #cc0000;
+            padding: 0.75rem 0;
+            letter-spacing: 4px;
+        }
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+        }
+        nav ul li a {
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.75rem 0;
+            display: inline-block;
+            border-bottom: 2px solid transparent;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        nav ul li a:hover, nav ul li a.active {
+            color: #cc0000;
+            border-bottom-color: #cc0000;
+        }
+
+        /* Page header */
+        .page-header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            background: linear-gradient(180deg, #1a0000 0%, #0a0a0a 100%);
+            border-bottom: 1px solid #222;
+        }
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #cc0000;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            text-shadow: 0 0 20px rgba(204,0,0,0.4);
+        }
+        .page-header p { color: #888; margin-top: 0.5rem; }
+
+        /* Tier sections */
+        .tier-section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 3rem 2rem 1rem;
+        }
+        .tier-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .tier-header h2 {
+            font-size: 1.5rem;
+            color: #cc0000;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            white-space: nowrap;
+        }
+        .tier-header .line {
+            flex: 1;
+            height: 1px;
+            background: #333;
+        }
+        .tier-header .tier-badge {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .tier-badge.t1 { background: #1a3a1a; color: #4ade80; border: 1px solid #2a5a2a; }
+        .tier-badge.t2 { background: #1a2a3a; color: #60a5fa; border: 1px solid #2a4a6a; }
+        .tier-badge.t3 { background: #3a2a1a; color: #f59e0b; border: 1px solid #5a4a2a; }
+        .tier-badge.t4 { background: #2a1a3a; color: #c084fc; border: 1px solid #4a2a5a; }
+
+        /* Port cards */
+        .port-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .port-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 4px;
+            padding: 1.25rem;
+            transition: border-color 0.2s;
+        }
+        .port-card:hover { border-color: #444; }
+        .port-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+        .port-card h3 {
+            font-size: 1rem;
+            color: #e0e0e0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .status-badge {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.2rem 0.6rem;
+            border-radius: 3px;
+            white-space: nowrap;
+        }
+        .status-badge.stable { background: #1a3a1a; color: #4ade80; }
+        .status-badge.beta { background: #1a2a3a; color: #60a5fa; }
+        .status-badge.alpha { background: #3a2a1a; color: #f59e0b; }
+        .status-badge.wip { background: #3a1a1a; color: #f87171; }
+        .status-badge.experimental { background: #2a1a3a; color: #c084fc; }
+
+        .port-card p {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 0.75rem;
+            line-height: 1.5;
+        }
+        .port-card .tags {
+            display: flex;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.75rem;
+        }
+        .port-card .tag {
+            font-size: 0.7rem;
+            color: #777;
+            background: #252525;
+            padding: 0.15rem 0.5rem;
+            border-radius: 3px;
+        }
+        .port-card .download-link {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid #222;
+            padding: 2rem;
+            text-align: center;
+            color: #555;
+            font-size: 0.8rem;
+            line-height: 2;
+            margin-top: 2rem;
+        }
+        footer a { color: #888; }
+        footer a:hover { color: #cc0000; }
+        footer .footer-links { margin-bottom: 0.5rem; }
+        footer .footer-links a { margin: 0 0.75rem; }
+
+        @media (max-width: 768px) {
+            nav { flex-direction: column; padding: 0.5rem 1rem; }
+            nav ul { padding-bottom: 0.5rem; flex-wrap: wrap; justify-content: center; gap: 0.75rem; }
+            .page-header h1 { font-size: 1.8rem; }
+            .port-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">DOOM</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="play.html">Play</a></li>
+            <li><a href="ports.html" class="active">Ports</a></li>
+            <li><a href="legal.html">Legal</a></li>
+            <li><a href="https://github.com/jeisaacs/Doom" target="_blank">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="page-header">
+        <h1>Platform Ports</h1>
+        <p>Every port in the Mega-Repo, organized by maturity tier</p>
+    </div>
+
+    <!-- TIER 1 -->
+    <div class="tier-section">
+        <div class="tier-header">
+            <h2>Tier 1</h2>
+            <span class="tier-badge t1">Fully Functional</span>
+            <div class="line"></div>
+        </div>
+        <div class="port-grid">
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Windows (x86/x64)</h3>
+                    <span class="status-badge stable">Stable</span>
+                </div>
+                <p>Native Win32 build with SDL2. Supports modern resolutions, gamepad input, and WASAPI audio.</p>
+                <div class="tags"><span class="tag">SDL2</span><span class="tag">Win32</span><span class="tag">DirectSound</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Linux (x86/x64/ARM)</h3>
+                    <span class="status-badge stable">Stable</span>
+                </div>
+                <p>SDL2-based port with X11, Wayland, and framebuffer backends. ALSA and PulseAudio support.</p>
+                <div class="tags"><span class="tag">SDL2</span><span class="tag">X11</span><span class="tag">Wayland</span><span class="tag">ALSA</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>macOS (Universal)</h3>
+                    <span class="status-badge stable">Stable</span>
+                </div>
+                <p>Universal Binary supporting Apple Silicon (ARM64) and Intel (x86_64). Native Cocoa + SDL2.</p>
+                <div class="tags"><span class="tag">SDL2</span><span class="tag">Cocoa</span><span class="tag">Universal Binary</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Web / WASM</h3>
+                    <span class="status-badge stable">Stable</span>
+                </div>
+                <p>Emscripten-compiled WebAssembly build. Runs in any modern browser with no plugins required.</p>
+                <div class="tags"><span class="tag">Emscripten</span><span class="tag">WASM</span><span class="tag">WebGL</span></div>
+                <a href="play.html" class="download-link">Play Now &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>DOS</h3>
+                    <span class="status-badge stable">Stable</span>
+                </div>
+                <p>The original DOOM experience. Compiles with Open Watcom or DJGPP. VGA mode 13h rendering.</p>
+                <div class="tags"><span class="tag">DJGPP</span><span class="tag">Open Watcom</span><span class="tag">VGA</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- TIER 2 -->
+    <div class="tier-section">
+        <div class="tier-header">
+            <h2>Tier 2</h2>
+            <span class="tier-badge t2">Solid Ports</span>
+            <div class="line"></div>
+        </div>
+        <div class="port-grid">
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Android</h3>
+                    <span class="status-badge beta">Beta</span>
+                </div>
+                <p>NDK-based port with touch controls and Bluetooth gamepad support. OpenGL ES 2.0 rendering.</p>
+                <div class="tags"><span class="tag">NDK</span><span class="tag">OpenGL ES</span><span class="tag">Touch</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>iOS</h3>
+                    <span class="status-badge beta">Beta</span>
+                </div>
+                <p>Xcode project with MFi controller support and touch controls. Metal rendering backend.</p>
+                <div class="tags"><span class="tag">Metal</span><span class="tag">MFi</span><span class="tag">Touch</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>FreeBSD</h3>
+                    <span class="status-badge stable">Stable</span>
+                </div>
+                <p>SDL2 port adapted for FreeBSD. OSS audio support. Builds via ports or direct compilation.</p>
+                <div class="tags"><span class="tag">SDL2</span><span class="tag">OSS</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Raspberry Pi (Linux)</h3>
+                    <span class="status-badge stable">Stable</span>
+                </div>
+                <p>Optimized for Raspberry Pi hardware. Supports framebuffer direct rendering and GPIO input.</p>
+                <div class="tags"><span class="tag">Framebuffer</span><span class="tag">GPIO</span><span class="tag">ALSA</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Windows ARM64</h3>
+                    <span class="status-badge beta">Beta</span>
+                </div>
+                <p>Native ARM64 build for Windows on ARM devices (Surface Pro X, etc). SDL2 backend.</p>
+                <div class="tags"><span class="tag">SDL2</span><span class="tag">ARM64</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- TIER 3 -->
+    <div class="tier-section">
+        <div class="tier-header">
+            <h2>Tier 3</h2>
+            <span class="tier-badge t3">Homebrew &amp; Retro</span>
+            <div class="line"></div>
+        </div>
+        <div class="port-grid">
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Nintendo Switch</h3>
+                    <span class="status-badge alpha">Alpha</span>
+                </div>
+                <p>Homebrew port using devkitPro/libnx. Joy-Con support with motion aiming. Runs via Homebrew Launcher.</p>
+                <div class="tags"><span class="tag">devkitPro</span><span class="tag">libnx</span><span class="tag">Homebrew</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>PS Vita</h3>
+                    <span class="status-badge alpha">Alpha</span>
+                </div>
+                <p>VitaSDK homebrew port with dual analog stick support. 960x544 native rendering.</p>
+                <div class="tags"><span class="tag">VitaSDK</span><span class="tag">Homebrew</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Nintendo 3DS</h3>
+                    <span class="status-badge alpha">Alpha</span>
+                </div>
+                <p>devkitARM homebrew port. Stereoscopic 3D support on the top screen, automap on the bottom.</p>
+                <div class="tags"><span class="tag">devkitARM</span><span class="tag">3D</span><span class="tag">Homebrew</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>PSP</h3>
+                    <span class="status-badge alpha">Alpha</span>
+                </div>
+                <p>PSPSDK homebrew port. Analog nub for movement with custom button mapping.</p>
+                <div class="tags"><span class="tag">PSPSDK</span><span class="tag">Homebrew</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Dreamcast</h3>
+                    <span class="status-badge alpha">Alpha</span>
+                </div>
+                <p>KallistiOS-based port for Sega Dreamcast. Boots from CD-R via mil-CD or SD loader.</p>
+                <div class="tags"><span class="tag">KallistiOS</span><span class="tag">SH4</span><span class="tag">Homebrew</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>GBA</h3>
+                    <span class="status-badge wip">WIP</span>
+                </div>
+                <p>Game Boy Advance port using devkitARM. Reduced resolution (240x160) with optimized renderer.</p>
+                <div class="tags"><span class="tag">devkitARM</span><span class="tag">ARM7TDMI</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Amiga</h3>
+                    <span class="status-badge alpha">Alpha</span>
+                </div>
+                <p>Amiga OS port targeting AGA chipset. Requires 68040+ or PPC accelerator for playable speeds.</p>
+                <div class="tags"><span class="tag">AGA</span><span class="tag">68k</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- TIER 4 -->
+    <div class="tier-section">
+        <div class="tier-header">
+            <h2>Tier 4</h2>
+            <span class="tier-badge t4">Educational &amp; Experimental</span>
+            <div class="line"></div>
+        </div>
+        <div class="port-grid">
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>STM32 (ARM Cortex-M)</h3>
+                    <span class="status-badge experimental">Experimental</span>
+                </div>
+                <p>Bare-metal DOOM on STM32F4/F7 microcontrollers. SPI display output, minimal input via buttons.</p>
+                <div class="tags"><span class="tag">Bare Metal</span><span class="tag">Cortex-M</span><span class="tag">SPI Display</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Raspberry Pi Bare Metal</h3>
+                    <span class="status-badge experimental">Experimental</span>
+                </div>
+                <p>Runs without an OS directly on Raspberry Pi hardware. HDMI output, USB keyboard input.</p>
+                <div class="tags"><span class="tag">Bare Metal</span><span class="tag">HDMI</span><span class="tag">USB HID</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>RISC-V</h3>
+                    <span class="status-badge experimental">Experimental</span>
+                </div>
+                <p>Educational bare-metal port targeting RISC-V development boards (SiFive, etc).</p>
+                <div class="tags"><span class="tag">Bare Metal</span><span class="tag">RV64</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>ESP32</h3>
+                    <span class="status-badge wip">WIP</span>
+                </div>
+                <p>ESP-IDF based port for ESP32 with SPI TFT display. Heavily reduced resolution and assets.</p>
+                <div class="tags"><span class="tag">ESP-IDF</span><span class="tag">SPI TFT</span><span class="tag">WiFi</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>Haiku OS</h3>
+                    <span class="status-badge experimental">Experimental</span>
+                </div>
+                <p>Port for the Haiku operating system (BeOS successor). Native BWindow rendering.</p>
+                <div class="tags"><span class="tag">BWindow</span><span class="tag">BeAPI</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>TempleOS</h3>
+                    <span class="status-badge wip">WIP</span>
+                </div>
+                <p>HolyC port for TempleOS. 640x480 16-color VGA. A truly divine DOOM experience.</p>
+                <div class="tags"><span class="tag">HolyC</span><span class="tag">VGA 16-color</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+            <div class="port-card">
+                <div class="port-card-header">
+                    <h3>UEFI</h3>
+                    <span class="status-badge experimental">Experimental</span>
+                </div>
+                <p>Runs as a UEFI application -- DOOM before your OS even boots. GOP framebuffer rendering.</p>
+                <div class="tags"><span class="tag">UEFI</span><span class="tag">GOP</span><span class="tag">Pre-boot</span></div>
+                <a href="#" class="download-link">View Source &rarr;</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <a href="index.html">Home</a>
+            <a href="play.html">Play</a>
+            <a href="ports.html">Ports</a>
+            <a href="legal.html">Legal</a>
+            <a href="https://github.com/jeisaacs/Doom" target="_blank">GitHub</a>
+        </div>
+        <p>DOOM is &copy; id Software. Source code released under the GNU General Public License v2.</p>
+        <p>This project is not affiliated with or endorsed by id Software or Bethesda Softworks.</p>
+    </footer>
+</body>
+</html>

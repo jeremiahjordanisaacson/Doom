@@ -1,0 +1,38 @@
+# =============================================================================
+# Dockerfile.emscripten - Web/WASM Build Environment for DOOM
+# =============================================================================
+# Builds the Emscripten/WebAssembly port of DOOM and serves it locally.
+#
+# Usage:
+#   docker build -f docker/Dockerfile.emscripten -t doom-web .
+#   docker run -p 8080:8080 doom-web
+# =============================================================================
+
+FROM emscripten/emsdk:3.1.50
+
+LABEL maintainer="DOOM Multiplatform Mega-Repo"
+LABEL description="Web/WASM build environment for DOOM"
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake \
+    build-essential \
+    python3 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /doom
+
+# Copy the entire project tree
+COPY . .
+
+# Build the Web/WASM port using Emscripten's CMake wrapper
+RUN emcmake cmake -B build-web \
+    -DCMAKE_BUILD_TYPE=Release \
+    ports/web \
+    && cmake --build build-web --parallel $(nproc)
+
+# Expose the dev server port
+EXPOSE 8080
+
+# Serve the built files with Python's built-in HTTP server
+CMD ["python3", "-m", "http.server", "8080", "--directory", "build-web"]

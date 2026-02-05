@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOOM - Pure JavaScript Port</title>
+    <style>
+        body {
+            margin: 0;
+            background: #0a0a0a;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #cc0000;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+        .subtitle {
+            color: #888;
+            margin-bottom: 20px;
+        }
+        #doom-canvas {
+            border: 2px solid #cc0000;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            width: 640px;
+            height: 400px;
+            cursor: crosshair;
+        }
+        .controls {
+            margin-top: 20px;
+            color: #888;
+            text-align: center;
+            max-width: 640px;
+        }
+        .controls kbd {
+            background: #333;
+            border: 1px solid #555;
+            padding: 2px 8px;
+            border-radius: 3px;
+            color: #cc0000;
+        }
+        #wad-input {
+            margin: 20px 0;
+        }
+        button {
+            background: #cc0000;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        button:hover { background: #ff0000; }
+        #status { color: #888; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>DOOM.js</h1>
+    <p class="subtitle">Pure JavaScript DOOM Renderer (Educational)</p>
+
+    <div id="wad-input">
+        <label>Load WAD file: </label>
+        <input type="file" id="wad-file" accept=".wad">
+        <button id="start-btn" disabled>Start</button>
+    </div>
+
+    <p id="status">Load a WAD file to begin...</p>
+
+    <canvas id="doom-canvas"></canvas>
+
+    <div class="controls">
+        <p>
+            <kbd>W</kbd>/<kbd>S</kbd> Move forward/back &nbsp;
+            <kbd>A</kbd>/<kbd>D</kbd> Turn left/right &nbsp;
+            <kbd>Q</kbd>/<kbd>E</kbd> Strafe
+        </p>
+        <p>This is an educational JavaScript reimplementation of the DOOM renderer.
+           Not a full game - demonstrates BSP traversal, wall projection, and palette handling.</p>
+    </div>
+
+    <script src="src/doom.js"></script>
+    <script>
+        const fileInput = document.getElementById('wad-file');
+        const startBtn = document.getElementById('start-btn');
+        const status = document.getElementById('status');
+        let doom = null;
+        let wadBuffer = null;
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            status.textContent = 'Loading WAD...';
+            wadBuffer = await file.arrayBuffer();
+            status.textContent = `WAD loaded: ${file.name} (${(file.size / 1024).toFixed(0)} KB)`;
+            startBtn.disabled = false;
+        });
+
+        startBtn.addEventListener('click', () => {
+            try {
+                doom = new DoomJS('doom-canvas');
+                doom.wad = new WADReader(wadBuffer);
+                doom.renderer.palette = new Palette(doom.wad);
+                doom.loadMap('E1M1');
+                doom.start();
+                status.textContent = 'Running - E1M1';
+                startBtn.textContent = 'Restart';
+            } catch (err) {
+                status.textContent = `Error: ${err.message}`;
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

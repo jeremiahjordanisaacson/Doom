@@ -1,0 +1,40 @@
+GNU GENERAL PUBLIC LICENSE
+Version 2, June 1991
+
+Copyright (C) 1989, 1991 Free Software Foundation, Inc.
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
+
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
+
+For the full text of the GNU General Public License Version 2,
+please visit: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+This project is licensed under the GNU General Public License v2.0.
+
+You are free to:
+- Use the software for any purpose
+- Study how the software works and modify it
+- Distribute copies of the software
+- Distribute copies of your modified versions
+
+Under the following conditions:
+- Any distributed copies or modifications must also be licensed under GPL v2
+- You must include the source code (or make it available) when distributing
+- You must include a copy of this license with any distribution
+- You must preserve all copyright notices
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+---
+
+Original DOOM source code:
+Copyright (C) 1993-1996 id Software, Inc.
+
+PrBoom engine:
+Copyright (C) 1999-2006 PrBoom contributors
+
+Multiplatform Mega-Repo:
+Copyright (C) 2010-2026 Jeremiah Isaacson and contributors
