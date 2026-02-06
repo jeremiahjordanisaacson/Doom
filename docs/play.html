@@ -16,7 +16,6 @@
         a { color: #cc0000; text-decoration: none; transition: color 0.2s; }
         a:hover { color: #ff3333; }
 
-        /* Nav */
         nav {
             background: #111;
             border-bottom: 2px solid #cc0000;
@@ -28,241 +27,89 @@
             top: 0;
             z-index: 100;
         }
-        nav .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #cc0000;
-            padding: 0.75rem 0;
-            letter-spacing: 4px;
-        }
-        nav ul {
-            list-style: none;
-            display: flex;
-            gap: 1.5rem;
-        }
+        nav .logo { font-size: 1.5rem; font-weight: bold; color: #cc0000; padding: 0.75rem 0; letter-spacing: 4px; }
+        nav ul { list-style: none; display: flex; gap: 1.5rem; }
         nav ul li a {
-            color: #e0e0e0;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 0.75rem 0;
-            display: inline-block;
-            border-bottom: 2px solid transparent;
+            color: #e0e0e0; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;
+            padding: 0.75rem 0; display: inline-block; border-bottom: 2px solid transparent;
             transition: border-color 0.2s, color 0.2s;
         }
-        nav ul li a:hover, nav ul li a.active {
-            color: #cc0000;
-            border-bottom-color: #cc0000;
-        }
+        nav ul li a:hover, nav ul li a.active { color: #cc0000; border-bottom-color: #cc0000; }
 
-        /* Page header */
         .page-header {
-            text-align: center;
-            padding: 3rem 2rem 2rem;
+            text-align: center; padding: 3rem 2rem 2rem;
             background: linear-gradient(180deg, #1a0000 0%, #0a0a0a 100%);
             border-bottom: 1px solid #222;
         }
-        .page-header h1 {
-            font-size: 2.5rem;
-            color: #cc0000;
-            text-transform: uppercase;
-            letter-spacing: 6px;
-            text-shadow: 0 0 20px rgba(204,0,0,0.4);
-        }
-        .page-header p {
-            color: #888;
-            margin-top: 0.5rem;
-        }
+        .page-header h1 { font-size: 2.5rem; color: #cc0000; text-transform: uppercase; letter-spacing: 6px; text-shadow: 0 0 20px rgba(204,0,0,0.4); }
+        .page-header p { color: #888; margin-top: 0.5rem; }
 
-        /* Game container */
-        .game-wrapper {
-            max-width: 960px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
+        .game-wrapper { max-width: 960px; margin: 2rem auto; padding: 0 2rem; }
         .game-container {
-            background: #000;
-            border: 2px solid #333;
-            border-radius: 4px;
-            position: relative;
-            width: 100%;
-            aspect-ratio: 4/3;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
+            background: #000; border: 2px solid #333; border-radius: 4px;
+            position: relative; width: 100%; aspect-ratio: 4/3;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
         .game-container canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            cursor: crosshair;
+            width: 100%; height: 100%; display: block;
+            image-rendering: pixelated; image-rendering: crisp-edges; cursor: crosshair;
         }
 
-        /* Loading overlay */
         .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0a0a0a;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0a0a0a; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 10;
         }
         .loading-overlay.hidden { display: none; }
-        .loading-title {
-            font-size: 2rem;
-            color: #cc0000;
-            letter-spacing: 6px;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 0 20px rgba(204,0,0,0.5);
-        }
-        .loading-status {
-            color: #888;
-            font-size: 0.85rem;
-            margin-bottom: 1rem;
-            text-align: center;
-            line-height: 1.6;
-        }
+        .loading-title { font-size: 3rem; color: #cc0000; letter-spacing: 8px; margin-bottom: 1.5rem; text-shadow: 0 0 30px rgba(204,0,0,0.6); }
+        .loading-sub { color: #666; font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 2rem; text-transform: uppercase; }
+        .progress-bar-track { width: 300px; height: 12px; background: #1a1a1a; border: 1px solid #333; border-radius: 2px; overflow: hidden; margin-bottom: 1rem; }
+        .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #8b0000, #cc0000); transition: width 0.2s; }
+        .loading-status { color: #888; font-size: 0.85rem; text-align: center; line-height: 1.6; }
 
-        /* Controls bar */
-        .controls-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 0.75rem;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
+        .controls-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; gap: 0.5rem; flex-wrap: wrap; }
         .controls-bar .left { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
         .btn {
-            display: inline-block;
-            padding: 0.6rem 1.4rem;
-            border: 2px solid #cc0000;
-            color: #e0e0e0;
-            font-family: inherit;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: transparent;
-            border-radius: 4px;
+            display: inline-block; padding: 0.6rem 1.4rem; border: 2px solid #cc0000;
+            color: #e0e0e0; font-family: inherit; font-size: 0.85rem; text-transform: uppercase;
+            letter-spacing: 1px; cursor: pointer; transition: all 0.2s; background: transparent; border-radius: 4px;
         }
         .btn:hover { background: #cc0000; color: #fff; }
         .btn-primary { background: #cc0000; color: #fff; }
         .btn-primary:hover { background: #8b0000; border-color: #8b0000; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-small { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
-
         .wad-input { display: none; }
 
-        .notice {
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 4px;
-            padding: 1rem 1.25rem;
-            margin-top: 1.5rem;
-            font-size: 0.85rem;
-            color: #bbb;
-        }
+        .notice { background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 1rem 1.25rem; margin-top: 1.5rem; font-size: 0.85rem; color: #bbb; }
         .notice strong { color: #cc0000; }
 
-        .mode-badge {
-            display: inline-block;
-            padding: 0.2rem 0.6rem;
-            border-radius: 3px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .mode-badge.demo { background: #2a1a3a; color: #c084fc; }
-        .mode-badge.wad { background: #1a3a1a; color: #4ade80; }
+        .mode-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 3px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+        .mode-badge.e1m1 { background: #1a3a1a; color: #4ade80; }
+        .mode-badge.custom { background: #1a2a3a; color: #60a5fa; }
 
-        /* Controls help */
         section { padding: 2rem; max-width: 960px; margin: 0 auto; }
-        section h2 {
-            font-size: 1.5rem;
-            color: #cc0000;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            margin-bottom: 1rem;
-        }
-        section h2::after {
-            content: '';
-            display: block;
-            width: 40px;
-            height: 2px;
-            background: #cc0000;
-            margin-top: 0.5rem;
-        }
-        .controls-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        .control-item {
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 4px;
-            padding: 1rem;
-        }
-        .control-item .key {
-            display: inline-block;
-            background: #2a2a2a;
-            color: #e0e0e0;
-            padding: 0.2rem 0.6rem;
-            border-radius: 3px;
-            font-size: 0.85rem;
-            border: 1px solid #444;
-            margin-right: 0.3rem;
-        }
-        .control-item .action {
-            color: #888;
-            font-size: 0.85rem;
-        }
+        section h2 { font-size: 1.5rem; color: #cc0000; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 1rem; }
+        section h2::after { content: ''; display: block; width: 40px; height: 2px; background: #cc0000; margin-top: 0.5rem; }
+        .controls-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem; }
+        .control-item { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 4px; padding: 1rem; }
+        .control-item .key { display: inline-block; background: #2a2a2a; color: #e0e0e0; padding: 0.2rem 0.6rem; border-radius: 3px; font-size: 0.85rem; border: 1px solid #444; margin-right: 0.3rem; }
+        .control-item .action { color: #888; font-size: 0.85rem; }
 
-        /* Footer */
-        footer {
-            border-top: 1px solid #222;
-            padding: 2rem;
-            text-align: center;
-            color: #555;
-            font-size: 0.8rem;
-            line-height: 2;
-            margin-top: 2rem;
-        }
+        footer { border-top: 1px solid #222; padding: 2rem; text-align: center; color: #555; font-size: 0.8rem; line-height: 2; margin-top: 2rem; }
         footer a { color: #888; }
         footer a:hover { color: #cc0000; }
         footer .footer-links { margin-bottom: 0.5rem; }
         footer .footer-links a { margin: 0 0.75rem; }
 
-        /* HUD overlay */
-        .hud-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: none;
-            font-size: 10px;
-            color: #aaa;
-            padding: 4px 8px;
-            background: rgba(0,0,0,0.5);
-            pointer-events: none;
-        }
+        .hud-overlay { position: absolute; bottom: 0; left: 0; right: 0; display: none; font-size: 10px; color: #aaa; padding: 4px 8px; background: rgba(0,0,0,0.6); pointer-events: none; }
         .hud-overlay.visible { display: flex; justify-content: space-between; }
 
         @media (max-width: 768px) {
             nav { flex-direction: column; padding: 0.5rem 1rem; }
             nav ul { padding-bottom: 0.5rem; }
             .page-header h1 { font-size: 1.8rem; }
+            .progress-bar-track { width: 220px; }
         }
     </style>
 </head>
@@ -280,7 +127,7 @@
 
     <div class="page-header">
         <h1>Play DOOM in Your Browser</h1>
-        <p>Pure JavaScript BSP Renderer &mdash; No plugins, no downloads</p>
+        <p>Pure JavaScript BSP Renderer &mdash; Shareware Episode 1: Knee-Deep in the Dead</p>
     </div>
 
     <div class="game-wrapper">
@@ -288,36 +135,37 @@
             <canvas id="doom-canvas" tabindex="1"></canvas>
             <div class="loading-overlay" id="loading-overlay">
                 <div class="loading-title">DOOM</div>
-                <div class="loading-status" id="loading-status">
-                    Click START to launch the built-in demo level.<br>
-                    Or load your own DOOM1.WAD for the real thing.
+                <div class="loading-sub">Shareware v1.9</div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill" id="progress-fill"></div>
                 </div>
+                <div class="loading-status" id="loading-status">Click START to load E1M1</div>
             </div>
             <div class="hud-overlay" id="hud">
                 <span id="hud-pos"></span>
+                <span id="hud-map"></span>
                 <span id="hud-fps"></span>
-                <span id="hud-mode"></span>
             </div>
         </div>
 
         <div class="controls-bar">
             <div class="left">
-                <button class="btn btn-primary" id="btn-start" onclick="startDemo()">Start Demo</button>
-                <button class="btn btn-small" id="btn-load-wad" onclick="document.getElementById('wad-file').click()">Load WAD File</button>
+                <button class="btn btn-primary" id="btn-start" onclick="startGame()">Start Game</button>
+                <button class="btn btn-small" id="btn-load-wad" onclick="document.getElementById('wad-file').click()">Load Custom WAD</button>
                 <input type="file" id="wad-file" class="wad-input" accept=".wad">
                 <button class="btn btn-small" id="btn-fullscreen" onclick="goFullscreen()" disabled>Fullscreen</button>
-                <span class="mode-badge demo" id="mode-badge">Demo</span>
+                <span class="mode-badge e1m1" id="mode-badge">E1M1</span>
             </div>
             <div style="color:#888; font-size:0.8rem;">
-                WASD to move, Q/E to strafe
+                WASD to move, Q/E strafe, Shift to run
             </div>
         </div>
 
         <div class="notice">
-            <strong>Pure JavaScript Renderer:</strong> This is a hand-written JavaScript implementation
-            of the DOOM BSP rendering engine for educational purposes. It demonstrates BSP tree
-            traversal, wall projection, floor/ceiling rendering, and palette handling. Load a DOOM
-            shareware WAD (DOOM1.WAD) for the full experience, or explore the built-in demo level.
+            <strong>DOOM Shareware (v1.9):</strong> This uses the freely distributable DOOM shareware
+            WAD released by id Software, rendered with a pure JavaScript BSP engine. The shareware
+            episode (Knee-Deep in the Dead) may be freely redistributed. Commercial WAD files are
+            not included.
         </div>
     </div>
 
@@ -411,29 +259,159 @@
     }
 
     // ================================================================
-    // Palette
+    // Palette & Texture Support
     // ================================================================
-    class Palette {
-        constructor(wad) {
-            this.palettes = [];
-            var data = wad.getLump('PLAYPAL');
-            if (!data) return;
-            for (var p = 0; p < 14; p++) {
-                var pal = new Uint32Array(256);
-                for (var i = 0; i < 256; i++) {
-                    var off = p * 768 + i * 3;
-                    pal[i] = 0xFF000000 | (data[off + 2] << 16) | (data[off + 1] << 8) | data[off];
+    var palettes = [];
+    var colormaps = [];
+    var wallTextures = {};   // name -> {width, height, pixels (palette indices)}
+    var flatTextures = {};   // name -> {pixels (palette indices), 64x64}
+
+    function loadPalettes(wad) {
+        palettes = [];
+        var data = wad.getLump('PLAYPAL');
+        if (!data) return;
+        for (var p = 0; p < 14; p++) {
+            var pal = new Uint32Array(256);
+            for (var i = 0; i < 256; i++) {
+                var off = p * 768 + i * 3;
+                pal[i] = 0xFF000000 | (data[off + 2] << 16) | (data[off + 1] << 8) | data[off];
+            }
+            palettes.push(pal);
+        }
+    }
+
+    function loadColormaps(wad) {
+        colormaps = [];
+        var data = wad.getLump('COLORMAP');
+        if (!data) return;
+        for (var c = 0; c < 34; c++) {
+            colormaps.push(data.slice(c * 256, (c + 1) * 256));
+        }
+    }
+
+    function loadFlats(wad) {
+        flatTextures = {};
+        // Flats are between F_START and F_END markers
+        var fStart = -1, fEnd = -1;
+        for (var i = 0; i < wad.directory.length; i++) {
+            if (wad.directory[i].name === 'F_START' || wad.directory[i].name === 'FF_START') fStart = i;
+            if (wad.directory[i].name === 'F_END' || wad.directory[i].name === 'FF_END') { fEnd = i; break; }
+        }
+        if (fStart < 0 || fEnd < 0) return;
+        for (var i = fStart + 1; i < fEnd; i++) {
+            var entry = wad.directory[i];
+            if (entry.size === 4096) { // 64x64
+                flatTextures[entry.name] = wad.getLumpByIndex(i);
+            }
+        }
+    }
+
+    function loadWallTextures(wad) {
+        wallTextures = {};
+        // Load PNAMES (patch names)
+        var pnamesData = wad.getLump('PNAMES');
+        if (!pnamesData) return;
+        var pnView = new DataView(pnamesData.buffer, pnamesData.byteOffset, pnamesData.byteLength);
+        var numPatches = pnView.getInt32(0, true);
+        var patchNames = [];
+        for (var i = 0; i < numPatches; i++) {
+            var name = '';
+            for (var j = 0; j < 8; j++) {
+                var ch = pnamesData[4 + i * 8 + j];
+                if (ch === 0) break;
+                name += String.fromCharCode(ch);
+            }
+            patchNames.push(name.toUpperCase());
+        }
+
+        // Load patches (column-based image format)
+        var patchLumps = {};
+        for (var i = 0; i < patchNames.length; i++) {
+            var lump = wad.getLump(patchNames[i]);
+            if (lump) patchLumps[patchNames[i]] = lump;
+        }
+
+        // Load TEXTURE1 (and TEXTURE2 if present)
+        var texLumps = ['TEXTURE1', 'TEXTURE2'];
+        for (var tl = 0; tl < texLumps.length; tl++) {
+            var texData = wad.getLump(texLumps[tl]);
+            if (!texData) continue;
+            var tv = new DataView(texData.buffer, texData.byteOffset, texData.byteLength);
+            var numTex = tv.getInt32(0, true);
+            for (var i = 0; i < numTex; i++) {
+                var texOff = tv.getInt32(4 + i * 4, true);
+                var tName = '';
+                for (var j = 0; j < 8; j++) {
+                    var ch = texData[texOff + j];
+                    if (ch === 0) break;
+                    tName += String.fromCharCode(ch);
                 }
-                this.palettes.push(pal);
+                tName = tName.toUpperCase();
+                // Skip masked (unused) 4 bytes, then width/height
+                var tW = tv.getUint16(texOff + 12, true);
+                var tH = tv.getUint16(texOff + 14, true);
+                // Skip columndirectory (4 bytes)
+                var tPatchCount = tv.getUint16(texOff + 20, true);
+
+                // Create pixel buffer
+                var texPixels = new Int16Array(tW * tH);
+                texPixels.fill(-1); // -1 = transparent
+
+                // Compose patches
+                for (var p = 0; p < tPatchCount; p++) {
+                    var pOff = texOff + 22 + p * 10;
+                    var pOriginX = tv.getInt16(pOff, true);
+                    var pOriginY = tv.getInt16(pOff + 2, true);
+                    var pIdx = tv.getUint16(pOff + 4, true);
+                    if (pIdx >= patchNames.length) continue;
+                    var patchName = patchNames[pIdx];
+                    var patchData = patchLumps[patchName];
+                    if (!patchData) continue;
+
+                    drawPatchToBuffer(patchData, texPixels, tW, tH, pOriginX, pOriginY);
+                }
+
+                wallTextures[tName] = { width: tW, height: tH, pixels: texPixels };
+            }
+        }
+    }
+
+    function drawPatchToBuffer(patchData, buffer, bufW, bufH, originX, originY) {
+        var pv = new DataView(patchData.buffer, patchData.byteOffset, patchData.byteLength);
+        var pW = pv.getUint16(0, true);
+        var pH = pv.getUint16(2, true);
+        // leftOffset and topOffset at bytes 4-7 (not used for composition)
+
+        for (var col = 0; col < pW; col++) {
+            var destX = originX + col;
+            if (destX < 0 || destX >= bufW) continue;
+            var colOff = pv.getUint32(8 + col * 4, true);
+            if (colOff >= patchData.length) continue;
+
+            // Read column posts
+            while (true) {
+                var rowStart = patchData[colOff];
+                if (rowStart === 0xFF) break;
+                var pixelCount = patchData[colOff + 1];
+                // colOff+2 is padding byte
+                for (var row = 0; row < pixelCount; row++) {
+                    var destY = originY + rowStart + row;
+                    if (destY >= 0 && destY < bufH) {
+                        buffer[destY * bufW + destX] = patchData[colOff + 3 + row];
+                    }
+                }
+                colOff += pixelCount + 4; // 1 rowstart + 1 count + 1 pad before + pixels + 1 pad after
+                if (colOff >= patchData.length) break;
             }
         }
     }
 
     // ================================================================
-    // Map loader (from WAD)
+    // Map Data
     // ================================================================
     class DoomMap {
         constructor(wad, mapName) {
+            this.name = mapName;
             this.vertices = []; this.linedefs = []; this.sidedefs = [];
             this.sectors = []; this.subsectors = []; this.segs = [];
             this.nodes = []; this.things = [];
@@ -453,9 +431,9 @@
             d = this._findLump(wad, mi, 'LINEDEFS');
             if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); for (var i = 0; i < d.length; i += 14) this.linedefs.push({ v1: v.getUint16(i, true), v2: v.getUint16(i + 2, true), flags: v.getUint16(i + 4, true), special: v.getUint16(i + 6, true), tag: v.getUint16(i + 8, true), frontSide: v.getInt16(i + 10, true), backSide: v.getInt16(i + 12, true) }); }
             d = this._findLump(wad, mi, 'SIDEDEFS');
-            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); var dec = new TextDecoder('ascii'); for (var i = 0; i < d.length; i += 30) this.sidedefs.push({ xOffset: v.getInt16(i, true), yOffset: v.getInt16(i + 2, true), upper: dec.decode(d.slice(i + 4, i + 12)).replace(/\0+$/, ''), lower: dec.decode(d.slice(i + 12, i + 20)).replace(/\0+$/, ''), middle: dec.decode(d.slice(i + 20, i + 28)).replace(/\0+$/, ''), sector: v.getUint16(i + 28, true) }); }
+            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); var dec = new TextDecoder('ascii'); for (var i = 0; i < d.length; i += 30) this.sidedefs.push({ xOffset: v.getInt16(i, true), yOffset: v.getInt16(i + 2, true), upper: dec.decode(d.slice(i + 4, i + 12)).replace(/\0+$/, '').toUpperCase(), lower: dec.decode(d.slice(i + 12, i + 20)).replace(/\0+$/, '').toUpperCase(), middle: dec.decode(d.slice(i + 20, i + 28)).replace(/\0+$/, '').toUpperCase(), sector: v.getUint16(i + 28, true) }); }
             d = this._findLump(wad, mi, 'SECTORS');
-            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); var dec = new TextDecoder('ascii'); for (var i = 0; i < d.length; i += 26) this.sectors.push({ floorHeight: v.getInt16(i, true), ceilingHeight: v.getInt16(i + 2, true), floorFlat: dec.decode(d.slice(i + 4, i + 12)).replace(/\0+$/, ''), ceilingFlat: dec.decode(d.slice(i + 12, i + 20)).replace(/\0+$/, ''), lightLevel: v.getInt16(i + 20, true), special: v.getUint16(i + 22, true), tag: v.getUint16(i + 24, true) }); }
+            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); var dec = new TextDecoder('ascii'); for (var i = 0; i < d.length; i += 26) this.sectors.push({ floorHeight: v.getInt16(i, true), ceilingHeight: v.getInt16(i + 2, true), floorFlat: dec.decode(d.slice(i + 4, i + 12)).replace(/\0+$/, '').toUpperCase(), ceilingFlat: dec.decode(d.slice(i + 12, i + 20)).replace(/\0+$/, '').toUpperCase(), lightLevel: v.getInt16(i + 20, true), special: v.getUint16(i + 22, true), tag: v.getUint16(i + 24, true) }); }
             d = this._findLump(wad, mi, 'SSECTORS');
             if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); for (var i = 0; i < d.length; i += 4) this.subsectors.push({ numSegs: v.getUint16(i, true), firstSeg: v.getUint16(i + 2, true) }); }
             d = this._findLump(wad, mi, 'SEGS');
@@ -468,106 +446,14 @@
     }
 
     // ================================================================
-    // Procedural Demo Map (no WAD needed)
-    // ================================================================
-    function buildDemoMap() {
-        var map = {
-            vertices: [], linedefs: [], sidedefs: [], sectors: [],
-            subsectors: [], segs: [], nodes: [], things: []
-        };
-
-        // Build a multi-room level with corridors and height variation
-        var sectorId = 0;
-
-        function addRoom(x1, y1, x2, y2, floor, ceil, light) {
-            var si = sectorId++;
-            map.sectors.push({ floorHeight: floor, ceilingHeight: ceil, floorFlat: 'FLAT1', ceilingFlat: 'FLAT1', lightLevel: light, special: 0, tag: 0 });
-            var vi = map.vertices.length;
-            map.vertices.push({ x: x1, y: y1 }); // 0: bottom-left
-            map.vertices.push({ x: x2, y: y1 }); // 1: bottom-right
-            map.vertices.push({ x: x2, y: y2 }); // 2: top-right
-            map.vertices.push({ x: x1, y: y2 }); // 3: top-left
-
-            // 4 walls
-            var walls = [[vi, vi+1], [vi+1, vi+2], [vi+2, vi+3], [vi+3, vi]];
-            for (var w = 0; w < 4; w++) {
-                var sdi = map.sidedefs.length;
-                map.sidedefs.push({ xOffset: 0, yOffset: 0, upper: '-', lower: '-', middle: 'WALL', sector: si });
-                var li = map.linedefs.length;
-                map.linedefs.push({ v1: walls[w][0], v2: walls[w][1], flags: 1, special: 0, tag: 0, frontSide: sdi, backSide: -1 });
-                map.segs.push({ v1: walls[w][0], v2: walls[w][1], angle: 0, linedef: li, direction: 0, offset: 0 });
-            }
-
-            var ssi = map.subsectors.length;
-            map.subsectors.push({ numSegs: 4, firstSeg: map.segs.length - 4 });
-            return { sectorIndex: si, vertexStart: vi, subsectorIndex: ssi };
-        }
-
-        // Main hall
-        addRoom(-384, -384, 384, 384, 0, 200, 220);
-        // East corridor
-        addRoom(384, -96, 768, 96, 0, 160, 180);
-        // East room (raised floor)
-        addRoom(768, -256, 1280, 256, 24, 200, 200);
-        // North corridor
-        addRoom(-96, 384, 96, 768, 0, 144, 140);
-        // North room (tall ceiling)
-        addRoom(-320, 768, 320, 1280, -16, 280, 240);
-        // West corridor
-        addRoom(-768, -96, -384, 96, 0, 160, 120);
-        // West room (dark)
-        addRoom(-1280, -256, -768, 256, 0, 192, 80);
-        // South passage
-        addRoom(-128, -768, 128, -384, 16, 176, 160);
-        // South room
-        addRoom(-384, -1280, 384, -768, 32, 200, 190);
-
-        // Build a simple BSP: binary tree over the subsectors
-        // We'll build a balanced binary tree of nodes
-        var numSS = map.subsectors.length;
-        function buildNode(ssIndices) {
-            if (ssIndices.length === 1) {
-                return 0x8000 | ssIndices[0]; // leaf
-            }
-            var mid = Math.floor(ssIndices.length / 2);
-            var leftIndices = ssIndices.slice(0, mid);
-            var rightIndices = ssIndices.slice(mid);
-
-            var leftChild = buildNode(leftIndices);
-            var rightChild = buildNode(rightIndices);
-
-            var ni = map.nodes.length;
-            map.nodes.push({
-                x: 0, y: 0, dx: 1, dy: 0,
-                rightBBox: [-2000, -2000, 2000, 2000],
-                leftBBox: [-2000, -2000, 2000, 2000],
-                rightChild: rightChild,
-                leftChild: leftChild
-            });
-            return ni;
-        }
-
-        var allSS = [];
-        for (var i = 0; i < numSS; i++) allSS.push(i);
-        buildNode(allSS);
-
-        // Player start in center of main hall
-        map.things.push({ x: 0, y: 0, angle: 90, type: 1, flags: 7 });
-
-        return map;
-    }
-
-    // ================================================================
     // Renderer
     // ================================================================
     var SCREEN_W = 320, SCREEN_H = 200;
-
     var canvas, ctx, imageData, pixels;
     var upperClip, lowerClip;
     var playerX = 0, playerY = 0, playerAngle = 0, playerZ = 41;
-    var currentMap = null;
+    var currentMap = null, currentMapName = '';
     var running = false;
-    var usingWAD = false;
     var frameCount = 0, lastFpsTime = 0, fps = 0;
 
     function initRenderer() {
@@ -583,6 +469,7 @@
 
     function setMap(map) {
         currentMap = map;
+        currentMapName = map.name;
         var start = map.things.find(function(t) { return t.type === 1; });
         if (start) {
             playerX = start.x;
@@ -591,63 +478,69 @@
         }
     }
 
+    function getColormap(lightLevel, depth) {
+        // Simulate DOOM's diminishing lighting
+        if (colormaps.length === 0) return 0;
+        var lightIdx = Math.floor((255 - lightLevel) / 8);
+        var distFade = Math.floor(depth / 200);
+        var cmapIdx = Math.min(31, Math.max(0, lightIdx + distFade));
+        return cmapIdx;
+    }
+
     function render() {
         if (!currentMap) return;
-
-        // Clear to dark
         pixels.fill(0xFF000000);
         upperClip.fill(0);
         lowerClip.fill(SCREEN_H);
 
-        // Draw floor gradient and ceiling gradient for uncovered pixels later
-        // Traverse BSP
         if (currentMap.nodes.length > 0) {
             renderBSP(currentMap.nodes.length - 1);
         } else {
-            // Fallback: render all subsectors directly
-            for (var i = 0; i < currentMap.subsectors.length; i++) {
-                renderSubsector(i);
-            }
-        }
-
-        // Fill remaining uncovered ceiling/floor pixels
-        for (var x = 0; x < SCREEN_W; x++) {
-            // Ceiling (dark gray gradient)
-            for (var y = 0; y < upperClip[x] && y < SCREEN_H; y++) {
-                var ci = Math.floor(40 + (y / SCREEN_H) * 30);
-                pixels[y * SCREEN_W + x] = 0xFF000000 | (ci << 16) | (ci << 8) | ci;
-            }
+            for (var i = 0; i < currentMap.subsectors.length; i++) renderSubsector(i);
         }
 
         ctx.putImageData(imageData, 0, 0);
     }
 
     function renderBSP(nodeIndex) {
-        if (nodeIndex & 0x8000) {
-            renderSubsector(nodeIndex & 0x7FFF);
-            return;
-        }
+        if (nodeIndex & 0x8000) { renderSubsector(nodeIndex & 0x7FFF); return; }
         var node = currentMap.nodes[nodeIndex];
         if (!node) return;
-        var dx = playerX - node.x;
-        var dy = playerY - node.y;
+        var dx = playerX - node.x, dy = playerY - node.y;
         var side = (dx * node.dy - dy * node.dx) < 0;
-        if (side) {
-            renderBSP(node.leftChild);
-            renderBSP(node.rightChild);
-        } else {
-            renderBSP(node.rightChild);
-            renderBSP(node.leftChild);
-        }
+        if (side) { renderBSP(node.leftChild); renderBSP(node.rightChild); }
+        else { renderBSP(node.rightChild); renderBSP(node.leftChild); }
     }
 
     function renderSubsector(index) {
         var ss = currentMap.subsectors[index];
         if (!ss) return;
+
+        // Determine sector for floor/ceiling rendering
+        var seg0 = currentMap.segs[ss.firstSeg];
+        if (seg0) {
+            var ld0 = currentMap.linedefs[seg0.linedef];
+            if (ld0) {
+                var sideIdx0 = seg0.direction === 0 ? ld0.frontSide : ld0.backSide;
+                if (sideIdx0 >= 0) {
+                    var side0 = currentMap.sidedefs[sideIdx0];
+                    if (side0) {
+                        var sector0 = currentMap.sectors[side0.sector];
+                        if (sector0) renderFlatsForSubsector(ss, sector0);
+                    }
+                }
+            }
+        }
+
         for (var i = 0; i < ss.numSegs; i++) {
             var seg = currentMap.segs[ss.firstSeg + i];
             if (seg) renderSeg(seg);
         }
+    }
+
+    function renderFlatsForSubsector(ss, sector) {
+        // We'll render floors/ceilings as part of wall rendering (per-column)
+        // This is handled inside renderSeg
     }
 
     function renderSeg(seg) {
@@ -659,7 +552,6 @@
         var p2 = transformVertex(v2);
         if (p1.y <= 1 && p2.y <= 1) return;
 
-        // Clip near plane
         if (p1.y < 1) { var t = (1 - p1.y) / (p2.y - p1.y); p1 = { x: p1.x + t * (p2.x - p1.x), y: 1 }; }
         if (p2.y < 1) { var t = (1 - p2.y) / (p1.y - p2.y); p2 = { x: p2.x + t * (p1.x - p2.x), y: 1 }; }
 
@@ -672,6 +564,16 @@
         var sector = currentMap.sectors[side.sector];
         if (!sector) return;
 
+        // Back sector for two-sided lines
+        var backSector = null;
+        if (ld.backSide >= 0) {
+            var backSideIdx = seg.direction === 0 ? ld.backSide : ld.frontSide;
+            if (backSideIdx >= 0 && backSideIdx < currentMap.sidedefs.length) {
+                var bs = currentMap.sidedefs[backSideIdx];
+                if (bs) backSector = currentMap.sectors[bs.sector];
+            }
+        }
+
         var x1 = projectX(p1);
         var x2 = projectX(p2);
         if (x1 >= x2) return;
@@ -680,11 +582,16 @@
         var ceilH = sector.ceilingHeight - playerZ;
         var light = Math.min(255, Math.max(0, sector.lightLevel));
 
-        // Wall color variation based on seg angle for visual interest
-        var wallHue = ((seg.v1 * 37 + seg.v2 * 17) & 0xFF);
-        var baseR = 120 + ((wallHue >> 4) & 0xF) * 4;
-        var baseG = 70 + ((wallHue >> 2) & 0xF) * 2;
-        var baseB = 40 + (wallHue & 0xF) * 2;
+        // Calculate wall segment length for texture mapping
+        var wx = currentMap.vertices[seg.v2].x - currentMap.vertices[seg.v1].x;
+        var wy = currentMap.vertices[seg.v2].y - currentMap.vertices[seg.v1].y;
+        var segLen = Math.sqrt(wx * wx + wy * wy);
+
+        // Get texture info
+        var texName = side.middle;
+        var tex = (texName && texName !== '-') ? wallTextures[texName] : null;
+        var upperTex = (side.upper && side.upper !== '-') ? wallTextures[side.upper] : null;
+        var lowerTex = (side.lower && side.lower !== '-') ? wallTextures[side.lower] : null;
 
         var iStart = Math.max(0, Math.floor(x1));
         var iEnd = Math.min(SCREEN_W, Math.ceil(x2));
@@ -692,56 +599,152 @@
         for (var x = iStart; x < iEnd; x++) {
             if (upperClip[x] >= lowerClip[x]) continue;
 
-            var t = (x - x1) / (x2 - x1);
-            var depth = p1.y + t * (p2.y - p1.y);
-            if (depth <= 0) continue;
+            var screenT = (x - x1) / (x2 - x1);
+            var depth = p1.y + screenT * (p2.y - p1.y);
+            if (depth <= 0.1) continue;
 
             var halfH = SCREEN_H / 2;
             var scale = halfH / depth;
             var yTop = Math.floor(halfH - ceilH * scale);
             var yBottom = Math.floor(halfH - floorH * scale);
 
-            var drawTop = Math.max(upperClip[x], yTop);
-            var drawBottom = Math.min(lowerClip[x], yBottom);
+            var cmapIdx = getColormap(light, depth);
+            var cmap = colormaps.length > 0 ? colormaps[cmapIdx] : null;
+            var pal = palettes.length > 0 ? palettes[0] : null;
 
-            // Shade based on light level and distance
-            var shade = Math.min(1.0, light / 255) * Math.min(1.0, 400 / (depth + 50));
+            // Texture column
+            var wallTexOffset = seg.offset + screenT * segLen + side.xOffset;
 
-            // Wall
-            var wr = Math.floor(baseR * shade);
-            var wg = Math.floor(baseG * shade);
-            var wb = Math.floor(baseB * shade);
-            var wallColor = 0xFF000000 | (wb << 16) | (wg << 8) | wr;
-            for (var y = drawTop; y < drawBottom; y++) {
-                if (y >= 0 && y < SCREEN_H) pixels[y * SCREEN_W + x] = wallColor;
-            }
+            // For two-sided lines: upper and lower walls
+            if (backSector) {
+                var backFloorH = backSector.floorHeight - playerZ;
+                var backCeilH = backSector.ceilingHeight - playerZ;
+                var yBackTop = Math.floor(halfH - backCeilH * scale);
+                var yBackBottom = Math.floor(halfH - backFloorH * scale);
 
-            // Ceiling
-            var cs = shade * 0.5;
-            var cc = 0xFF000000 | (Math.floor(70 * cs) << 16) | (Math.floor(70 * cs) << 8) | Math.floor(70 * cs);
-            for (var y = upperClip[x]; y < Math.min(drawTop, lowerClip[x]); y++) {
-                if (y >= 0 && y < SCREEN_H) pixels[y * SCREEN_W + x] = cc;
-            }
+                // Upper wall (between front ceiling and back ceiling)
+                if (sector.ceilingHeight > backSector.ceilingHeight) {
+                    var uTop = Math.max(upperClip[x], yTop);
+                    var uBottom = Math.min(lowerClip[x], yBackTop);
+                    if (uTop < uBottom) {
+                        drawWallColumn(x, uTop, uBottom, upperTex, wallTexOffset, side.yOffset,
+                            sector.ceilingHeight, backSector.ceilingHeight, scale, depth, cmap, pal, light);
+                    }
+                }
 
-            // Floor
-            var fs = shade * 0.7;
-            var fc = 0xFF000000 | (Math.floor(50 * fs) << 16) | (Math.floor(80 * fs) << 8) | Math.floor(50 * fs);
-            for (var y = Math.max(drawBottom, upperClip[x]); y < lowerClip[x]; y++) {
-                if (y >= 0 && y < SCREEN_H) pixels[y * SCREEN_W + x] = fc;
-            }
+                // Lower wall (between back floor and front floor)
+                if (sector.floorHeight < backSector.floorHeight) {
+                    var lTop = Math.max(upperClip[x], yBackBottom);
+                    var lBottom = Math.min(lowerClip[x], yBottom);
+                    if (lTop < lBottom) {
+                        drawWallColumn(x, lTop, lBottom, lowerTex, wallTexOffset, side.yOffset,
+                            backSector.floorHeight, sector.floorHeight, scale, depth, cmap, pal, light);
+                    }
+                }
 
-            // Clip solid walls
-            if (ld.backSide < 0) {
+                // Ceiling
+                var cTop = upperClip[x];
+                var cBottom = Math.min(lowerClip[x], yTop);
+                drawFlatSpan(x, cTop, cBottom, sector.ceilingFlat, sector.ceilingHeight, light, depth, cmap, pal, true);
+
+                // Floor
+                var fTop = Math.max(upperClip[x], yBottom);
+                var fBottom = lowerClip[x];
+                drawFlatSpan(x, fTop, fBottom, sector.floorFlat, sector.floorHeight, light, depth, cmap, pal, false);
+
+                // Update clipping
+                if (yTop > upperClip[x]) upperClip[x] = Math.min(yTop, lowerClip[x]);
+                if (yBottom < lowerClip[x]) lowerClip[x] = Math.max(yBottom, upperClip[x]);
+            } else {
+                // Solid wall
+                var drawTop = Math.max(upperClip[x], yTop);
+                var drawBottom = Math.min(lowerClip[x], yBottom);
+
+                // Wall
+                if (drawTop < drawBottom) {
+                    drawWallColumn(x, drawTop, drawBottom, tex, wallTexOffset, side.yOffset,
+                        sector.ceilingHeight, sector.floorHeight, scale, depth, cmap, pal, light);
+                }
+
+                // Ceiling
+                var cTop = upperClip[x];
+                var cBottom = Math.min(drawTop, lowerClip[x]);
+                drawFlatSpan(x, cTop, cBottom, sector.ceilingFlat, sector.ceilingHeight, light, depth, cmap, pal, true);
+
+                // Floor
+                var fTop = Math.max(drawBottom, upperClip[x]);
+                var fBottom = lowerClip[x];
+                drawFlatSpan(x, fTop, fBottom, sector.floorFlat, sector.floorHeight, light, depth, cmap, pal, false);
+
                 upperClip[x] = lowerClip[x];
             }
         }
     }
 
+    function drawWallColumn(x, yStart, yEnd, tex, texOffsetX, texOffsetY, topWorldZ, botWorldZ, scale, depth, cmap, pal, light) {
+        if (tex && pal) {
+            var texCol = (Math.floor(texOffsetX) % tex.width + tex.width) % tex.width;
+            var wallHeight = topWorldZ - botWorldZ;
+            for (var y = yStart; y < yEnd; y++) {
+                if (y < 0 || y >= SCREEN_H) continue;
+                var frac = (y - (SCREEN_H / 2 - topWorldZ * scale + playerZ * scale)) / (wallHeight * scale);
+                var texY = Math.floor((frac * wallHeight + texOffsetY) % tex.height);
+                if (texY < 0) texY += tex.height;
+                var palIdx = tex.pixels[texY * tex.width + texCol];
+                if (palIdx < 0) continue; // transparent
+                if (cmap) palIdx = cmap[palIdx];
+                pixels[y * SCREEN_W + x] = pal[palIdx];
+            }
+        } else {
+            // Fallback: solid color shading
+            var shade = Math.min(1.0, light / 255) * Math.min(1.0, 400 / (depth + 50));
+            var wallColor = 0xFF000000 | (Math.floor(60 * shade) << 16) | (Math.floor(50 * shade) << 8) | Math.floor(90 * shade);
+            for (var y = yStart; y < yEnd; y++) {
+                if (y >= 0 && y < SCREEN_H) pixels[y * SCREEN_W + x] = wallColor;
+            }
+        }
+    }
+
+    function drawFlatSpan(x, yStart, yEnd, flatName, planeZ, light, wallDepth, cmap, pal, isCeiling) {
+        var flatData = flatTextures[flatName];
+        if (flatData && pal) {
+            var planeH = planeZ - playerZ;
+            var halfH = SCREEN_H / 2;
+            var cosA = Math.cos(playerAngle);
+            var sinA = Math.sin(playerAngle);
+
+            for (var y = yStart; y < yEnd; y++) {
+                if (y < 0 || y >= SCREEN_H) continue;
+                var rowDist = halfH * Math.abs(planeH) / Math.abs(y - halfH + 0.01);
+                var floorX = playerX + rowDist * (sinA + (x - SCREEN_W / 2) * cosA / (SCREEN_W / 2));
+                var floorY = playerY + rowDist * (cosA - (x - SCREEN_W / 2) * sinA / (SCREEN_W / 2));
+                var tx = ((Math.floor(floorX) % 64) + 64) % 64;
+                var ty = ((Math.floor(floorY) % 64) + 64) % 64;
+                var palIdx = flatData[ty * 64 + tx];
+                var cmIdx = getColormap(light, rowDist);
+                if (colormaps.length > 0) palIdx = colormaps[cmIdx][palIdx];
+                pixels[y * SCREEN_W + x] = pal[palIdx];
+            }
+        } else {
+            // Fallback
+            var shade = Math.min(1.0, light / 255) * Math.min(1.0, 400 / (wallDepth + 50));
+            var color;
+            if (isCeiling) {
+                var cs = shade * 0.5;
+                color = 0xFF000000 | (Math.floor(60 * cs) << 16) | (Math.floor(60 * cs) << 8) | Math.floor(60 * cs);
+            } else {
+                var fs = shade * 0.7;
+                color = 0xFF000000 | (Math.floor(40 * fs) << 16) | (Math.floor(70 * fs) << 8) | Math.floor(40 * fs);
+            }
+            for (var y = yStart; y < yEnd; y++) {
+                if (y >= 0 && y < SCREEN_H) pixels[y * SCREEN_W + x] = color;
+            }
+        }
+    }
+
     function transformVertex(v) {
-        var dx = v.x - playerX;
-        var dy = v.y - playerY;
-        var cos = Math.cos(playerAngle);
-        var sin = Math.sin(playerAngle);
+        var dx = v.x - playerX, dy = v.y - playerY;
+        var cos = Math.cos(playerAngle), sin = Math.sin(playerAngle);
         return { x: dx * cos - dy * sin, y: dx * sin + dy * cos };
     }
 
@@ -763,9 +766,7 @@
     function updateInput() {
         var moveSpeed = keys['ShiftLeft'] || keys['ShiftRight'] ? 10 : 5;
         var turnSpeed = keys['ShiftLeft'] || keys['ShiftRight'] ? 0.08 : 0.04;
-        var cos = Math.cos(playerAngle);
-        var sin = Math.sin(playerAngle);
-
+        var cos = Math.cos(playerAngle), sin = Math.sin(playerAngle);
         if (keys['KeyW'] || keys['ArrowUp']) { playerX += sin * moveSpeed; playerY += cos * moveSpeed; }
         if (keys['KeyS'] || keys['ArrowDown']) { playerX -= sin * moveSpeed; playerY -= cos * moveSpeed; }
         if (keys['KeyA'] || keys['ArrowLeft']) { playerAngle -= turnSpeed; }
@@ -781,61 +782,112 @@
         if (!running) return;
         updateInput();
         render();
-
         frameCount++;
         var now = performance.now();
-        if (now - lastFpsTime >= 1000) {
-            fps = frameCount;
-            frameCount = 0;
-            lastFpsTime = now;
-        }
+        if (now - lastFpsTime >= 1000) { fps = frameCount; frameCount = 0; lastFpsTime = now; }
         document.getElementById('hud-pos').textContent = 'X:' + Math.round(playerX) + ' Y:' + Math.round(playerY);
+        document.getElementById('hud-map').textContent = currentMapName;
         document.getElementById('hud-fps').textContent = fps + ' FPS';
-        document.getElementById('hud-mode').textContent = usingWAD ? 'WAD' : 'DEMO';
-
         requestAnimationFrame(gameLoop);
     }
 
-    function startEngine(map, isWAD) {
+    function startEngine(map) {
         initRenderer();
         setMap(map);
-        usingWAD = !!isWAD;
         running = true;
         lastFpsTime = performance.now();
         frameCount = 0;
-
         document.getElementById('loading-overlay').classList.add('hidden');
         document.getElementById('btn-fullscreen').disabled = false;
         document.getElementById('hud').classList.add('visible');
-
         var badge = document.getElementById('mode-badge');
-        if (isWAD) {
-            badge.className = 'mode-badge wad';
-            badge.textContent = 'WAD';
-        } else {
-            badge.className = 'mode-badge demo';
-            badge.textContent = 'Demo';
-        }
-
+        badge.className = 'mode-badge e1m1';
+        badge.textContent = map.name;
         canvas.focus();
         gameLoop();
     }
 
     // ================================================================
-    // Start handlers
+    // WAD Loading
     // ================================================================
-    function startDemo() {
-        running = false;
-        var map = buildDemoMap();
-        startEngine(map, false);
-        document.getElementById('btn-start').textContent = 'Restart Demo';
+    var cachedWAD = null;
+
+    function loadWADAndStart(buffer, mapName) {
+        var wad = new WADReader(buffer);
+        cachedWAD = wad;
+
+        setProgress(40, 'Loading palettes and colormaps...');
+        loadPalettes(wad);
+        loadColormaps(wad);
+
+        setProgress(55, 'Loading textures...');
+        loadWallTextures(wad);
+
+        setProgress(70, 'Loading flats...');
+        loadFlats(wad);
+
+        setProgress(85, 'Loading ' + mapName + '...');
+        var map = new DoomMap(wad, mapName);
+
+        setProgress(100, 'Starting...');
+        setTimeout(function() { startEngine(map); }, 100);
     }
 
+    function setProgress(pct, text) {
+        document.getElementById('progress-fill').style.width = pct + '%';
+        document.getElementById('loading-status').textContent = text;
+    }
+
+    function startGame() {
+        var btn = document.getElementById('btn-start');
+        btn.disabled = true;
+        btn.textContent = 'Loading...';
+
+        setProgress(5, 'Downloading DOOM1.WAD (4.0 MB)...');
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'doom1.wad', true);
+        xhr.responseType = 'arraybuffer';
+        xhr.onprogress = function(e) {
+            if (e.lengthComputable) {
+                var pct = Math.floor((e.loaded / e.total) * 35) + 5;
+                var mb = (e.loaded / 1048576).toFixed(1);
+                setProgress(pct, 'Downloading DOOM1.WAD... ' + mb + ' MB');
+            }
+        };
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    loadWADAndStart(xhr.response, 'E1M1');
+                    btn.textContent = 'Restart';
+                    btn.disabled = false;
+                    btn.onclick = function() { running = false; loadWADAndStart(cachedWAD ? xhr.response : xhr.response, 'E1M1'); };
+                } catch (err) {
+                    setProgress(0, 'Error: ' + err.message);
+                    btn.disabled = false;
+                    btn.textContent = 'Retry';
+                    console.error(err);
+                }
+            } else {
+                setProgress(0, 'Error downloading WAD (HTTP ' + xhr.status + ')');
+                btn.disabled = false;
+                btn.textContent = 'Retry';
+            }
+        };
+        xhr.onerror = function() {
+            setProgress(0, 'Network error downloading WAD');
+            btn.disabled = false;
+            btn.textContent = 'Retry';
+        };
+        xhr.send();
+    }
+
+    // Custom WAD upload
     document.getElementById('wad-file').addEventListener('change', function(e) {
         var file = e.target.files[0];
         if (!file) return;
-
-        document.getElementById('loading-status').textContent = 'Loading ' + file.name + '...';
+        document.getElementById('loading-overlay').classList.remove('hidden');
+        setProgress(10, 'Loading ' + file.name + '...');
 
         var reader = new FileReader();
         reader.onload = function(ev) {
@@ -843,21 +895,19 @@
                 running = false;
                 var wad = new WADReader(ev.target.result);
                 var mapName = 'E1M1';
-                // Try E1M1 first, then MAP01 (for DOOM2)
                 var found = wad.directory.find(function(d) { return d.name === 'E1M1'; });
                 if (!found) {
                     found = wad.directory.find(function(d) { return d.name === 'MAP01'; });
                     if (found) mapName = 'MAP01';
                 }
-                if (!found) {
-                    document.getElementById('loading-status').textContent = 'Error: No E1M1 or MAP01 found in WAD';
-                    return;
-                }
-                var map = new DoomMap(wad, mapName);
-                startEngine(map, true);
-                document.getElementById('btn-start').textContent = 'Restart Demo';
+                if (!found) { setProgress(0, 'Error: No E1M1 or MAP01 found in WAD'); return; }
+
+                loadWADAndStart(ev.target.result, mapName);
+                var badge = document.getElementById('mode-badge');
+                badge.className = 'mode-badge custom';
+                badge.textContent = mapName;
             } catch (err) {
-                document.getElementById('loading-status').textContent = 'Error: ' + err.message;
+                setProgress(0, 'Error: ' + err.message);
                 console.error(err);
             }
         };
@@ -869,11 +919,6 @@
         if (c.requestFullscreen) c.requestFullscreen();
         else if (c.webkitRequestFullscreen) c.webkitRequestFullscreen();
     }
-
-    // Auto-start demo on page load for immediate visual feedback
-    window.addEventListener('DOMContentLoaded', function() {
-        // Don't auto-start, let the user click
-    });
     </script>
 </body>
 </html>
