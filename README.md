@@ -2,7 +2,7 @@
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)]()
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](LICENSE)
-[![Platforms](https://img.shields.io/badge/platforms-20%2B-orange)]()
+[![Platforms](https://img.shields.io/badge/platforms-21-orange)]()
 
 ```
 ______   ___   ___  __  __
@@ -24,8 +24,8 @@ one codebase, dozens of targets -- from desktop PCs to graphing calculators.
 
 | | Link |
 |---|---|
-| **Play in Browser** | [Launch Web/WASM build](https://example.com/doom-wasm) |
-| **Download** | [Releases page](https://github.com/example/doom-mega-repo/releases) |
+| **Play in Browser** | [Launch JS renderer](https://jeremiahjordanisaacson.github.io/Doom/play.html) |
+| **Website** | [Project homepage](https://jeremiahjordanisaacson.github.io/Doom/) |
 | **Documentation** | [docs/](docs/) |
 
 ---
@@ -34,14 +34,14 @@ one codebase, dozens of targets -- from desktop PCs to graphing calculators.
 
 | Port | Directory | Status |
 |---|---|---|
-| Desktop (SDL2) | `ports/sdl2/` | **Working** |
-| Web / WASM | `ports/wasm/` | **Working** |
+| Desktop (SDL2) | `ports/desktop/` | **Working** |
+| Web / WASM | `ports/web/` | **Working** |
 | Android | `ports/android/` | **Working** |
-| macOS | `ports/macos/` | In Progress |
-| Windows | `ports/windows/` | In Progress |
-| Linux Framebuffer | `ports/linux-fb/` | In Progress |
+| macOS | `ports/macos-native/` | In Progress |
+| Windows | `ports/windows-native/` | In Progress |
+| Linux Framebuffer | `ports/linux-framebuffer/` | In Progress |
 | iOS | `ports/ios/` | In Progress |
-| Raspberry Pi | `ports/rpi/` | In Progress |
+| Raspberry Pi | `ports/raspberrypi/` | In Progress |
 | Terminal (Curses) | `ports/terminal/` | In Progress |
 | Nintendo Switch | `ports/switch/` | Scaffold |
 | PlayStation | `ports/playstation/` | Scaffold |
@@ -52,8 +52,9 @@ one codebase, dozens of targets -- from desktop PCs to graphing calculators.
 | TI-83 Calculator | `ports/ti83/` | Proof of Concept |
 | ESP32 | `ports/esp32/` | Proof of Concept |
 | watchOS | `ports/watchos/` | Proof of Concept |
-| Commodore 64 | `ports/c64/` | Proof of Concept |
-| Pure JavaScript | `ports/purejs/` | Proof of Concept |
+| Commodore 64 | `ports/commodore64/` | Proof of Concept |
+| WASM Standalone | `ports/wasm-standalone/` | Proof of Concept |
+| Pure JavaScript | `ports/javascript/` | Proof of Concept |
 
 ---
 
@@ -64,20 +65,20 @@ Doom/
   README.md              This file
   LICENSE                 GNU General Public License v2
   LEGAL.md               Detailed legal notices and attribution
-  CMakeLists.txt         Top-level CMake build
-  Makefile               Convenience wrapper around CMake
-  core/                  Shared DOOM engine source (PrBoom-based)
-    src/                 C source files
-    include/             Public headers
+  engine/                Shared DOOM engine source (PrBoom-based)
+    src/                 C source files (79 files)
+    include/             Public headers (82 files)
+    CMakeLists.txt       Engine static library build
   ports/                 Platform-specific port implementations
-    sdl2/               Desktop SDL2 (Linux, macOS, Windows)
-    wasm/               Emscripten / WebAssembly build
+    desktop/            Desktop SDL2 (Linux, macOS, Windows)
+    web/                Emscripten / WebAssembly build
+    wasm-standalone/    Standalone WASM build
     android/            Android NDK + Java wrapper
-    macos/              Native macOS (AppKit / Metal)
-    windows/            Native Win32 / DirectX
-    linux-fb/           Raw Linux framebuffer
+    macos-native/       Native macOS (AppKit / Metal)
+    windows-native/     Native Win32 / DirectX
+    linux-framebuffer/  Raw Linux framebuffer
     ios/                iOS (UIKit / Metal)
-    rpi/                Raspberry Pi (bare-metal & Linux)
+    raspberrypi/        Raspberry Pi (bare-metal & Linux)
     terminal/           Terminal / ncurses renderer
     switch/             Nintendo Switch (libnx)
     playstation/        PlayStation homebrew
@@ -88,12 +89,11 @@ Doom/
     ti83/               TI-83 calculator (z80)
     esp32/              ESP32 microcontroller
     watchos/            Apple watchOS
-    c64/                Commodore 64 (6502)
-    purejs/             Pure JavaScript (no WASM)
-  data/                  Shareware WAD and demo lumps
-  docs/                  Documentation and guides
+    commodore64/        Commodore 64 (6502)
+    javascript/         Pure JavaScript BSP renderer (educational)
+  docs/                  GitHub Pages website
   tools/                 Build helpers, WAD utilities, scripts
-  tests/                 Automated test suite
+  docker/                Docker build environments
 ```
 
 ---
@@ -110,29 +110,20 @@ Doom/
 
 ```bash
 # Configure
-cmake -B build -DPORT=sdl2
+cmake -B build -S ports/desktop
 
 # Build
 cmake --build build -j$(nproc)
 
-# Run with the included shareware WAD
-./build/doom -iwad data/doom1.wad
+# Run (you'll need a WAD file -- see below)
+./build/doom -iwad doom1.wad
 ```
 
-### Build (using the Makefile wrapper)
+### Get the Shareware WAD
 
 ```bash
-# Desktop SDL2 (default)
-make
-
-# Web / WASM (requires Emscripten SDK)
-make PORT=wasm
-
-# Android (requires Android NDK)
-make PORT=android
-
-# Any other port
-make PORT=<port-name>
+# Download DOOM1.WAD (shareware, freely distributable)
+./tools/get-shareware-wad.sh
 ```
 
 ### Build (other ports)
@@ -151,8 +142,8 @@ and WAD distribution policies are documented in [LEGAL.md](LEGAL.md).
 **Key points:**
 
 - The DOOM **engine source code** is free software under GPL v2.
-- The **shareware WAD** (`doom1.wad`) is freely distributable and is included
-  in this repository under `data/`.
+- The **shareware WAD** (`doom1.wad`) is freely distributable. Use
+  `tools/get-shareware-wad.sh` to download it.
 - **Commercial WAD files** (`doom.wad`, `doom2.wad`, `plutonia.wad`,
   `tnt.wad`) are copyrighted by id Software / ZeniMax Media and are **NOT**
   included. You must purchase them legally to use them with this engine.

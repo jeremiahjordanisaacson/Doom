@@ -97,6 +97,8 @@
             height: 100%;
             display: block;
             image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            cursor: crosshair;
         }
 
         /* Loading overlay */
@@ -121,24 +123,12 @@
             margin-bottom: 1.5rem;
             text-shadow: 0 0 20px rgba(204,0,0,0.5);
         }
-        .progress-bar-track {
-            width: 300px;
-            height: 16px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #8b0000, #cc0000);
-            transition: width 0.3s;
-        }
         .loading-status {
             color: #888;
             font-size: 0.85rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            line-height: 1.6;
         }
 
         /* Controls bar */
@@ -150,6 +140,7 @@
             gap: 0.5rem;
             flex-wrap: wrap;
         }
+        .controls-bar .left { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
         .btn {
             display: inline-block;
             padding: 0.6rem 1.4rem;
@@ -168,6 +159,9 @@
         .btn-primary { background: #cc0000; color: #fff; }
         .btn-primary:hover { background: #8b0000; border-color: #8b0000; }
         .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-small { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
+
+        .wad-input { display: none; }
 
         .notice {
             background: #1a1a1a;
@@ -179,6 +173,17 @@
             color: #bbb;
         }
         .notice strong { color: #cc0000; }
+
+        .mode-badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .mode-badge.demo { background: #2a1a3a; color: #c084fc; }
+        .mode-badge.wad { background: #1a3a1a; color: #4ade80; }
 
         /* Controls help */
         section { padding: 2rem; max-width: 960px; margin: 0 auto; }
@@ -239,11 +244,25 @@
         footer .footer-links { margin-bottom: 0.5rem; }
         footer .footer-links a { margin: 0 0.75rem; }
 
+        /* HUD overlay */
+        .hud-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: none;
+            font-size: 10px;
+            color: #aaa;
+            padding: 4px 8px;
+            background: rgba(0,0,0,0.5);
+            pointer-events: none;
+        }
+        .hud-overlay.visible { display: flex; justify-content: space-between; }
+
         @media (max-width: 768px) {
             nav { flex-direction: column; padding: 0.5rem 1rem; }
             nav ul { padding-bottom: 0.5rem; }
             .page-header h1 { font-size: 1.8rem; }
-            .progress-bar-track { width: 220px; }
         }
     </style>
 </head>
@@ -255,13 +274,13 @@
             <li><a href="play.html" class="active">Play</a></li>
             <li><a href="ports.html">Ports</a></li>
             <li><a href="legal.html">Legal</a></li>
-            <li><a href="https://github.com/jeisaacs/Doom" target="_blank">GitHub</a></li>
+            <li><a href="https://github.com/jeremiahjordanisaacson/Doom" target="_blank">GitHub</a></li>
         </ul>
     </nav>
 
     <div class="page-header">
         <h1>Play DOOM in Your Browser</h1>
-        <p>Shareware Episode 1: Knee-Deep in the Dead</p>
+        <p>Pure JavaScript BSP Renderer &mdash; No plugins, no downloads</p>
     </div>
 
     <div class="game-wrapper">
@@ -269,28 +288,36 @@
             <canvas id="doom-canvas" tabindex="1"></canvas>
             <div class="loading-overlay" id="loading-overlay">
                 <div class="loading-title">DOOM</div>
-                <div class="progress-bar-track">
-                    <div class="progress-bar-fill" id="progress-fill"></div>
+                <div class="loading-status" id="loading-status">
+                    Click START to launch the built-in demo level.<br>
+                    Or load your own DOOM1.WAD for the real thing.
                 </div>
-                <div class="loading-status" id="loading-status">Click START to load DOOM...</div>
+            </div>
+            <div class="hud-overlay" id="hud">
+                <span id="hud-pos"></span>
+                <span id="hud-fps"></span>
+                <span id="hud-mode"></span>
             </div>
         </div>
 
         <div class="controls-bar">
-            <div>
-                <button class="btn btn-primary" id="btn-start" onclick="startDoom()">Start Game</button>
-                <button class="btn" id="btn-fullscreen" onclick="goFullscreen()" disabled>Fullscreen</button>
+            <div class="left">
+                <button class="btn btn-primary" id="btn-start" onclick="startDemo()">Start Demo</button>
+                <button class="btn btn-small" id="btn-load-wad" onclick="document.getElementById('wad-file').click()">Load WAD File</button>
+                <input type="file" id="wad-file" class="wad-input" accept=".wad">
+                <button class="btn btn-small" id="btn-fullscreen" onclick="goFullscreen()" disabled>Fullscreen</button>
+                <span class="mode-badge demo" id="mode-badge">Demo</span>
             </div>
             <div style="color:#888; font-size:0.8rem;">
-                Click the game area to capture mouse
+                WASD to move, Q/E to strafe
             </div>
         </div>
 
         <div class="notice">
-            <strong>Shareware WAD:</strong> This web player uses the freely distributable DOOM
-            shareware WAD (DOOM1.WAD), which includes Episode 1: Knee-Deep in the Dead. The
-            shareware WAD may be distributed freely. The full registered version WADs are
-            commercial products and are not included.
+            <strong>Pure JavaScript Renderer:</strong> This is a hand-written JavaScript implementation
+            of the DOOM BSP rendering engine for educational purposes. It demonstrates BSP tree
+            traversal, wall projection, floor/ceiling rendering, and palette handling. Load a DOOM
+            shareware WAD (DOOM1.WAD) for the full experience, or explore the built-in demo level.
         </div>
     </div>
 
@@ -298,52 +325,28 @@
         <h2>Controls</h2>
         <div class="controls-grid">
             <div class="control-item">
-                <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span>
-                <span class="action">-- Move / Strafe</span>
+                <span class="key">W</span><span class="key">S</span>
+                <span class="action">-- Move Forward / Back</span>
             </div>
             <div class="control-item">
-                <span class="key">Mouse</span>
-                <span class="action">-- Look / Aim</span>
+                <span class="key">A</span><span class="key">D</span>
+                <span class="action">-- Turn Left / Right</span>
             </div>
             <div class="control-item">
-                <span class="key">Left Click</span>
-                <span class="action">-- Fire Weapon</span>
-            </div>
-            <div class="control-item">
-                <span class="key">Space</span>
-                <span class="action">-- Use / Open Doors</span>
+                <span class="key">Q</span><span class="key">E</span>
+                <span class="action">-- Strafe Left / Right</span>
             </div>
             <div class="control-item">
                 <span class="key">Shift</span>
-                <span class="action">-- Run</span>
+                <span class="action">-- Run (2x speed)</span>
             </div>
             <div class="control-item">
-                <span class="key">1</span>-<span class="key">7</span>
-                <span class="action">-- Select Weapon</span>
-            </div>
-            <div class="control-item">
-                <span class="key">Tab</span>
-                <span class="action">-- Automap</span>
-            </div>
-            <div class="control-item">
-                <span class="key">Esc</span>
-                <span class="action">-- Menu</span>
-            </div>
-            <div class="control-item">
-                <span class="key">E</span>
-                <span class="action">-- Strafe Right (alt)</span>
-            </div>
-            <div class="control-item">
-                <span class="key">Q</span>
-                <span class="action">-- Strafe Left (alt)</span>
-            </div>
-            <div class="control-item">
-                <span class="key">Ctrl</span>
-                <span class="action">-- Fire (alt)</span>
+                <span class="key">Arrow Keys</span>
+                <span class="action">-- Move / Turn (alt)</span>
             </div>
             <div class="control-item">
                 <span class="key">F11</span>
-                <span class="action">-- Gamma Correction</span>
+                <span class="action">-- Toggle Fullscreen</span>
             </div>
         </div>
     </section>
@@ -354,84 +357,523 @@
             <a href="play.html">Play</a>
             <a href="ports.html">Ports</a>
             <a href="legal.html">Legal</a>
-            <a href="https://github.com/jeisaacs/Doom" target="_blank">GitHub</a>
+            <a href="https://github.com/jeremiahjordanisaacson/Doom" target="_blank">GitHub</a>
         </div>
         <p>DOOM is &copy; id Software. Source code released under the GNU General Public License v2.</p>
         <p>This project is not affiliated with or endorsed by id Software or Bethesda Softworks.</p>
     </footer>
 
     <script>
-        // ---- DOOM WASM Loader ----
-        var Module = {
-            canvas: document.getElementById('doom-canvas'),
-            print: function(text) { console.log('[DOOM]', text); },
-            printErr: function(text) { console.error('[DOOM]', text); },
-            setStatus: function(text) {
-                var statusEl = document.getElementById('loading-status');
-                if (!text) {
-                    // Loading complete
-                    document.getElementById('loading-overlay').classList.add('hidden');
-                    document.getElementById('btn-fullscreen').disabled = false;
-                    return;
-                }
-                // Parse progress "Downloading data... (X/Y)"
-                var match = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
-                if (match) {
-                    var progress = (parseInt(match[2]) / parseInt(match[4])) * 100;
-                    document.getElementById('progress-fill').style.width = progress + '%';
-                    statusEl.textContent = match[1].trim();
-                } else {
-                    statusEl.textContent = text;
-                }
-            },
-            totalDependencies: 0,
-            monitorRunDependencies: function(left) {
-                this.totalDependencies = Math.max(this.totalDependencies, left);
-                if (left) {
-                    Module.setStatus('Preparing... (' + (this.totalDependencies - left) + '/' + this.totalDependencies + ')');
-                } else {
-                    Module.setStatus('');
-                }
+    'use strict';
+
+    // ================================================================
+    // WAD File Parser
+    // ================================================================
+    class WADReader {
+        constructor(arrayBuffer) {
+            this.data = new DataView(arrayBuffer);
+            this.bytes = new Uint8Array(arrayBuffer);
+            this.directory = [];
+            this.parse();
+        }
+        parse() {
+            var id = this.readString(0, 4);
+            if (id !== 'IWAD' && id !== 'PWAD') throw new Error('Invalid WAD: ' + id);
+            this.type = id;
+            this.numLumps = this.data.getInt32(4, true);
+            this.dirOffset = this.data.getInt32(8, true);
+            for (var i = 0; i < this.numLumps; i++) {
+                var off = this.dirOffset + i * 16;
+                this.directory.push({
+                    offset: this.data.getInt32(off, true),
+                    size: this.data.getInt32(off + 4, true),
+                    name: this.readString(off + 8, 8).replace(/\0+$/, '')
+                });
             }
+        }
+        readString(offset, length) {
+            var s = '';
+            for (var i = 0; i < length; i++) {
+                var ch = this.bytes[offset + i];
+                if (ch === 0) break;
+                s += String.fromCharCode(ch);
+            }
+            return s;
+        }
+        getLump(name) {
+            var e = this.directory.find(function(d) { return d.name === name.toUpperCase(); });
+            return e ? this.bytes.slice(e.offset, e.offset + e.size) : null;
+        }
+        getLumpByIndex(idx) {
+            var e = this.directory[idx];
+            return e ? this.bytes.slice(e.offset, e.offset + e.size) : null;
+        }
+    }
+
+    // ================================================================
+    // Palette
+    // ================================================================
+    class Palette {
+        constructor(wad) {
+            this.palettes = [];
+            var data = wad.getLump('PLAYPAL');
+            if (!data) return;
+            for (var p = 0; p < 14; p++) {
+                var pal = new Uint32Array(256);
+                for (var i = 0; i < 256; i++) {
+                    var off = p * 768 + i * 3;
+                    pal[i] = 0xFF000000 | (data[off + 2] << 16) | (data[off + 1] << 8) | data[off];
+                }
+                this.palettes.push(pal);
+            }
+        }
+    }
+
+    // ================================================================
+    // Map loader (from WAD)
+    // ================================================================
+    class DoomMap {
+        constructor(wad, mapName) {
+            this.vertices = []; this.linedefs = []; this.sidedefs = [];
+            this.sectors = []; this.subsectors = []; this.segs = [];
+            this.nodes = []; this.things = [];
+            var mi = wad.directory.findIndex(function(d) { return d.name === mapName; });
+            if (mi < 0) throw new Error('Map ' + mapName + ' not found');
+            this._load(wad, mi);
+        }
+        _findLump(wad, mi, name) {
+            for (var i = mi + 1; i < wad.directory.length && i < mi + 12; i++)
+                if (wad.directory[i].name === name) return wad.getLumpByIndex(i);
+            return null;
+        }
+        _load(wad, mi) {
+            var d, v;
+            d = this._findLump(wad, mi, 'VERTEXES');
+            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); for (var i = 0; i < d.length; i += 4) this.vertices.push({ x: v.getInt16(i, true), y: v.getInt16(i + 2, true) }); }
+            d = this._findLump(wad, mi, 'LINEDEFS');
+            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); for (var i = 0; i < d.length; i += 14) this.linedefs.push({ v1: v.getUint16(i, true), v2: v.getUint16(i + 2, true), flags: v.getUint16(i + 4, true), special: v.getUint16(i + 6, true), tag: v.getUint16(i + 8, true), frontSide: v.getInt16(i + 10, true), backSide: v.getInt16(i + 12, true) }); }
+            d = this._findLump(wad, mi, 'SIDEDEFS');
+            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); var dec = new TextDecoder('ascii'); for (var i = 0; i < d.length; i += 30) this.sidedefs.push({ xOffset: v.getInt16(i, true), yOffset: v.getInt16(i + 2, true), upper: dec.decode(d.slice(i + 4, i + 12)).replace(/\0+$/, ''), lower: dec.decode(d.slice(i + 12, i + 20)).replace(/\0+$/, ''), middle: dec.decode(d.slice(i + 20, i + 28)).replace(/\0+$/, ''), sector: v.getUint16(i + 28, true) }); }
+            d = this._findLump(wad, mi, 'SECTORS');
+            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); var dec = new TextDecoder('ascii'); for (var i = 0; i < d.length; i += 26) this.sectors.push({ floorHeight: v.getInt16(i, true), ceilingHeight: v.getInt16(i + 2, true), floorFlat: dec.decode(d.slice(i + 4, i + 12)).replace(/\0+$/, ''), ceilingFlat: dec.decode(d.slice(i + 12, i + 20)).replace(/\0+$/, ''), lightLevel: v.getInt16(i + 20, true), special: v.getUint16(i + 22, true), tag: v.getUint16(i + 24, true) }); }
+            d = this._findLump(wad, mi, 'SSECTORS');
+            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); for (var i = 0; i < d.length; i += 4) this.subsectors.push({ numSegs: v.getUint16(i, true), firstSeg: v.getUint16(i + 2, true) }); }
+            d = this._findLump(wad, mi, 'SEGS');
+            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); for (var i = 0; i < d.length; i += 12) this.segs.push({ v1: v.getUint16(i, true), v2: v.getUint16(i + 2, true), angle: v.getInt16(i + 4, true), linedef: v.getUint16(i + 6, true), direction: v.getInt16(i + 8, true), offset: v.getInt16(i + 10, true) }); }
+            d = this._findLump(wad, mi, 'NODES');
+            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); for (var i = 0; i < d.length; i += 28) this.nodes.push({ x: v.getInt16(i, true), y: v.getInt16(i + 2, true), dx: v.getInt16(i + 4, true), dy: v.getInt16(i + 6, true), rightBBox: [v.getInt16(i + 8, true), v.getInt16(i + 10, true), v.getInt16(i + 12, true), v.getInt16(i + 14, true)], leftBBox: [v.getInt16(i + 16, true), v.getInt16(i + 18, true), v.getInt16(i + 20, true), v.getInt16(i + 22, true)], rightChild: v.getUint16(i + 24, true), leftChild: v.getUint16(i + 26, true) }); }
+            d = this._findLump(wad, mi, 'THINGS');
+            if (d) { v = new DataView(d.buffer, d.byteOffset, d.byteLength); for (var i = 0; i < d.length; i += 10) this.things.push({ x: v.getInt16(i, true), y: v.getInt16(i + 2, true), angle: v.getUint16(i + 4, true), type: v.getUint16(i + 6, true), flags: v.getUint16(i + 8, true) }); }
+        }
+    }
+
+    // ================================================================
+    // Procedural Demo Map (no WAD needed)
+    // ================================================================
+    function buildDemoMap() {
+        var map = {
+            vertices: [], linedefs: [], sidedefs: [], sectors: [],
+            subsectors: [], segs: [], nodes: [], things: []
         };
 
-        var gameStarted = false;
+        // Build a multi-room level with corridors and height variation
+        var sectorId = 0;
 
-        function startDoom() {
-            if (gameStarted) return;
-            gameStarted = true;
+        function addRoom(x1, y1, x2, y2, floor, ceil, light) {
+            var si = sectorId++;
+            map.sectors.push({ floorHeight: floor, ceilingHeight: ceil, floorFlat: 'FLAT1', ceilingFlat: 'FLAT1', lightLevel: light, special: 0, tag: 0 });
+            var vi = map.vertices.length;
+            map.vertices.push({ x: x1, y: y1 }); // 0: bottom-left
+            map.vertices.push({ x: x2, y: y1 }); // 1: bottom-right
+            map.vertices.push({ x: x2, y: y2 }); // 2: top-right
+            map.vertices.push({ x: x1, y: y2 }); // 3: top-left
 
-            var btnStart = document.getElementById('btn-start');
-            btnStart.disabled = true;
-            btnStart.textContent = 'Loading...';
+            // 4 walls
+            var walls = [[vi, vi+1], [vi+1, vi+2], [vi+2, vi+3], [vi+3, vi]];
+            for (var w = 0; w < 4; w++) {
+                var sdi = map.sidedefs.length;
+                map.sidedefs.push({ xOffset: 0, yOffset: 0, upper: '-', lower: '-', middle: 'WALL', sector: si });
+                var li = map.linedefs.length;
+                map.linedefs.push({ v1: walls[w][0], v2: walls[w][1], flags: 1, special: 0, tag: 0, frontSide: sdi, backSide: -1 });
+                map.segs.push({ v1: walls[w][0], v2: walls[w][1], angle: 0, linedef: li, direction: 0, offset: 0 });
+            }
 
-            document.getElementById('loading-status').textContent = 'Loading DOOM engine...';
-            document.getElementById('progress-fill').style.width = '10%';
-
-            // Load the Emscripten-compiled JS file
-            var script = document.createElement('script');
-            script.src = 'doom.js';
-            script.onerror = function() {
-                document.getElementById('loading-status').textContent =
-                    'Error: doom.js not found. Build the WASM port first.';
-                document.getElementById('progress-fill').style.width = '0%';
-                btnStart.disabled = false;
-                btnStart.textContent = 'Retry';
-                gameStarted = false;
-            };
-            document.body.appendChild(script);
+            var ssi = map.subsectors.length;
+            map.subsectors.push({ numSegs: 4, firstSeg: map.segs.length - 4 });
+            return { sectorIndex: si, vertexStart: vi, subsectorIndex: ssi };
         }
 
-        function goFullscreen() {
-            var container = document.getElementById('game-container');
-            if (container.requestFullscreen) {
-                container.requestFullscreen();
-            } else if (container.webkitRequestFullscreen) {
-                container.webkitRequestFullscreen();
-            } else if (container.mozRequestFullScreen) {
-                container.mozRequestFullScreen();
+        // Main hall
+        addRoom(-384, -384, 384, 384, 0, 200, 220);
+        // East corridor
+        addRoom(384, -96, 768, 96, 0, 160, 180);
+        // East room (raised floor)
+        addRoom(768, -256, 1280, 256, 24, 200, 200);
+        // North corridor
+        addRoom(-96, 384, 96, 768, 0, 144, 140);
+        // North room (tall ceiling)
+        addRoom(-320, 768, 320, 1280, -16, 280, 240);
+        // West corridor
+        addRoom(-768, -96, -384, 96, 0, 160, 120);
+        // West room (dark)
+        addRoom(-1280, -256, -768, 256, 0, 192, 80);
+        // South passage
+        addRoom(-128, -768, 128, -384, 16, 176, 160);
+        // South room
+        addRoom(-384, -1280, 384, -768, 32, 200, 190);
+
+        // Build a simple BSP: binary tree over the subsectors
+        // We'll build a balanced binary tree of nodes
+        var numSS = map.subsectors.length;
+        function buildNode(ssIndices) {
+            if (ssIndices.length === 1) {
+                return 0x8000 | ssIndices[0]; // leaf
+            }
+            var mid = Math.floor(ssIndices.length / 2);
+            var leftIndices = ssIndices.slice(0, mid);
+            var rightIndices = ssIndices.slice(mid);
+
+            var leftChild = buildNode(leftIndices);
+            var rightChild = buildNode(rightIndices);
+
+            var ni = map.nodes.length;
+            map.nodes.push({
+                x: 0, y: 0, dx: 1, dy: 0,
+                rightBBox: [-2000, -2000, 2000, 2000],
+                leftBBox: [-2000, -2000, 2000, 2000],
+                rightChild: rightChild,
+                leftChild: leftChild
+            });
+            return ni;
+        }
+
+        var allSS = [];
+        for (var i = 0; i < numSS; i++) allSS.push(i);
+        buildNode(allSS);
+
+        // Player start in center of main hall
+        map.things.push({ x: 0, y: 0, angle: 90, type: 1, flags: 7 });
+
+        return map;
+    }
+
+    // ================================================================
+    // Renderer
+    // ================================================================
+    var SCREEN_W = 320, SCREEN_H = 200;
+
+    var canvas, ctx, imageData, pixels;
+    var upperClip, lowerClip;
+    var playerX = 0, playerY = 0, playerAngle = 0, playerZ = 41;
+    var currentMap = null;
+    var running = false;
+    var usingWAD = false;
+    var frameCount = 0, lastFpsTime = 0, fps = 0;
+
+    function initRenderer() {
+        canvas = document.getElementById('doom-canvas');
+        ctx = canvas.getContext('2d');
+        canvas.width = SCREEN_W;
+        canvas.height = SCREEN_H;
+        imageData = ctx.createImageData(SCREEN_W, SCREEN_H);
+        pixels = new Uint32Array(imageData.data.buffer);
+        upperClip = new Int32Array(SCREEN_W);
+        lowerClip = new Int32Array(SCREEN_W);
+    }
+
+    function setMap(map) {
+        currentMap = map;
+        var start = map.things.find(function(t) { return t.type === 1; });
+        if (start) {
+            playerX = start.x;
+            playerY = start.y;
+            playerAngle = (start.angle * Math.PI) / 180;
+        }
+    }
+
+    function render() {
+        if (!currentMap) return;
+
+        // Clear to dark
+        pixels.fill(0xFF000000);
+        upperClip.fill(0);
+        lowerClip.fill(SCREEN_H);
+
+        // Draw floor gradient and ceiling gradient for uncovered pixels later
+        // Traverse BSP
+        if (currentMap.nodes.length > 0) {
+            renderBSP(currentMap.nodes.length - 1);
+        } else {
+            // Fallback: render all subsectors directly
+            for (var i = 0; i < currentMap.subsectors.length; i++) {
+                renderSubsector(i);
             }
         }
+
+        // Fill remaining uncovered ceiling/floor pixels
+        for (var x = 0; x < SCREEN_W; x++) {
+            // Ceiling (dark gray gradient)
+            for (var y = 0; y < upperClip[x] && y < SCREEN_H; y++) {
+                var ci = Math.floor(40 + (y / SCREEN_H) * 30);
+                pixels[y * SCREEN_W + x] = 0xFF000000 | (ci << 16) | (ci << 8) | ci;
+            }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+    }
+
+    function renderBSP(nodeIndex) {
+        if (nodeIndex & 0x8000) {
+            renderSubsector(nodeIndex & 0x7FFF);
+            return;
+        }
+        var node = currentMap.nodes[nodeIndex];
+        if (!node) return;
+        var dx = playerX - node.x;
+        var dy = playerY - node.y;
+        var side = (dx * node.dy - dy * node.dx) < 0;
+        if (side) {
+            renderBSP(node.leftChild);
+            renderBSP(node.rightChild);
+        } else {
+            renderBSP(node.rightChild);
+            renderBSP(node.leftChild);
+        }
+    }
+
+    function renderSubsector(index) {
+        var ss = currentMap.subsectors[index];
+        if (!ss) return;
+        for (var i = 0; i < ss.numSegs; i++) {
+            var seg = currentMap.segs[ss.firstSeg + i];
+            if (seg) renderSeg(seg);
+        }
+    }
+
+    function renderSeg(seg) {
+        var v1 = currentMap.vertices[seg.v1];
+        var v2 = currentMap.vertices[seg.v2];
+        if (!v1 || !v2) return;
+
+        var p1 = transformVertex(v1);
+        var p2 = transformVertex(v2);
+        if (p1.y <= 1 && p2.y <= 1) return;
+
+        // Clip near plane
+        if (p1.y < 1) { var t = (1 - p1.y) / (p2.y - p1.y); p1 = { x: p1.x + t * (p2.x - p1.x), y: 1 }; }
+        if (p2.y < 1) { var t = (1 - p2.y) / (p1.y - p2.y); p2 = { x: p2.x + t * (p1.x - p2.x), y: 1 }; }
+
+        var ld = currentMap.linedefs[seg.linedef];
+        if (!ld) return;
+        var sideIdx = seg.direction === 0 ? ld.frontSide : ld.backSide;
+        if (sideIdx < 0) return;
+        var side = currentMap.sidedefs[sideIdx];
+        if (!side) return;
+        var sector = currentMap.sectors[side.sector];
+        if (!sector) return;
+
+        var x1 = projectX(p1);
+        var x2 = projectX(p2);
+        if (x1 >= x2) return;
+
+        var floorH = sector.floorHeight - playerZ;
+        var ceilH = sector.ceilingHeight - playerZ;
+        var light = Math.min(255, Math.max(0, sector.lightLevel));
+
+        // Wall color variation based on seg angle for visual interest
+        var wallHue = ((seg.v1 * 37 + seg.v2 * 17) & 0xFF);
+        var baseR = 120 + ((wallHue >> 4) & 0xF) * 4;
+        var baseG = 70 + ((wallHue >> 2) & 0xF) * 2;
+        var baseB = 40 + (wallHue & 0xF) * 2;
+
+        var iStart = Math.max(0, Math.floor(x1));
+        var iEnd = Math.min(SCREEN_W, Math.ceil(x2));
+
+        for (var x = iStart; x < iEnd; x++) {
+            if (upperClip[x] >= lowerClip[x]) continue;
+
+            var t = (x - x1) / (x2 - x1);
+            var depth = p1.y + t * (p2.y - p1.y);
+            if (depth <= 0) continue;
+
+            var halfH = SCREEN_H / 2;
+            var scale = halfH / depth;
+            var yTop = Math.floor(halfH - ceilH * scale);
+            var yBottom = Math.floor(halfH - floorH * scale);
+
+            var drawTop = Math.max(upperClip[x], yTop);
+            var drawBottom = Math.min(lowerClip[x], yBottom);
+
+            // Shade based on light level and distance
+            var shade = Math.min(1.0, light / 255) * Math.min(1.0, 400 / (depth + 50));
+
+            // Wall
+            var wr = Math.floor(baseR * shade);
+            var wg = Math.floor(baseG * shade);
+            var wb = Math.floor(baseB * shade);
+            var wallColor = 0xFF000000 | (wb << 16) | (wg << 8) | wr;
+            for (var y = drawTop; y < drawBottom; y++) {
+                if (y >= 0 && y < SCREEN_H) pixels[y * SCREEN_W + x] = wallColor;
+            }
+
+            // Ceiling
+            var cs = shade * 0.5;
+            var cc = 0xFF000000 | (Math.floor(70 * cs) << 16) | (Math.floor(70 * cs) << 8) | Math.floor(70 * cs);
+            for (var y = upperClip[x]; y < Math.min(drawTop, lowerClip[x]); y++) {
+                if (y >= 0 && y < SCREEN_H) pixels[y * SCREEN_W + x] = cc;
+            }
+
+            // Floor
+            var fs = shade * 0.7;
+            var fc = 0xFF000000 | (Math.floor(50 * fs) << 16) | (Math.floor(80 * fs) << 8) | Math.floor(50 * fs);
+            for (var y = Math.max(drawBottom, upperClip[x]); y < lowerClip[x]; y++) {
+                if (y >= 0 && y < SCREEN_H) pixels[y * SCREEN_W + x] = fc;
+            }
+
+            // Clip solid walls
+            if (ld.backSide < 0) {
+                upperClip[x] = lowerClip[x];
+            }
+        }
+    }
+
+    function transformVertex(v) {
+        var dx = v.x - playerX;
+        var dy = v.y - playerY;
+        var cos = Math.cos(playerAngle);
+        var sin = Math.sin(playerAngle);
+        return { x: dx * cos - dy * sin, y: dx * sin + dy * cos };
+    }
+
+    function projectX(p) {
+        if (p.y <= 0) return p.x > 0 ? SCREEN_W : 0;
+        return (SCREEN_W / 2) + (p.x / p.y) * (SCREEN_W / 2);
+    }
+
+    // ================================================================
+    // Input
+    // ================================================================
+    var keys = {};
+    document.addEventListener('keydown', function(e) {
+        keys[e.code] = true;
+        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space','Tab'].indexOf(e.code) !== -1) e.preventDefault();
+    });
+    document.addEventListener('keyup', function(e) { keys[e.code] = false; });
+
+    function updateInput() {
+        var moveSpeed = keys['ShiftLeft'] || keys['ShiftRight'] ? 10 : 5;
+        var turnSpeed = keys['ShiftLeft'] || keys['ShiftRight'] ? 0.08 : 0.04;
+        var cos = Math.cos(playerAngle);
+        var sin = Math.sin(playerAngle);
+
+        if (keys['KeyW'] || keys['ArrowUp']) { playerX += sin * moveSpeed; playerY += cos * moveSpeed; }
+        if (keys['KeyS'] || keys['ArrowDown']) { playerX -= sin * moveSpeed; playerY -= cos * moveSpeed; }
+        if (keys['KeyA'] || keys['ArrowLeft']) { playerAngle -= turnSpeed; }
+        if (keys['KeyD'] || keys['ArrowRight']) { playerAngle += turnSpeed; }
+        if (keys['KeyQ']) { playerX -= cos * moveSpeed; playerY += sin * moveSpeed; }
+        if (keys['KeyE']) { playerX += cos * moveSpeed; playerY -= sin * moveSpeed; }
+    }
+
+    // ================================================================
+    // Game loop
+    // ================================================================
+    function gameLoop() {
+        if (!running) return;
+        updateInput();
+        render();
+
+        frameCount++;
+        var now = performance.now();
+        if (now - lastFpsTime >= 1000) {
+            fps = frameCount;
+            frameCount = 0;
+            lastFpsTime = now;
+        }
+        document.getElementById('hud-pos').textContent = 'X:' + Math.round(playerX) + ' Y:' + Math.round(playerY);
+        document.getElementById('hud-fps').textContent = fps + ' FPS';
+        document.getElementById('hud-mode').textContent = usingWAD ? 'WAD' : 'DEMO';
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function startEngine(map, isWAD) {
+        initRenderer();
+        setMap(map);
+        usingWAD = !!isWAD;
+        running = true;
+        lastFpsTime = performance.now();
+        frameCount = 0;
+
+        document.getElementById('loading-overlay').classList.add('hidden');
+        document.getElementById('btn-fullscreen').disabled = false;
+        document.getElementById('hud').classList.add('visible');
+
+        var badge = document.getElementById('mode-badge');
+        if (isWAD) {
+            badge.className = 'mode-badge wad';
+            badge.textContent = 'WAD';
+        } else {
+            badge.className = 'mode-badge demo';
+            badge.textContent = 'Demo';
+        }
+
+        canvas.focus();
+        gameLoop();
+    }
+
+    // ================================================================
+    // Start handlers
+    // ================================================================
+    function startDemo() {
+        running = false;
+        var map = buildDemoMap();
+        startEngine(map, false);
+        document.getElementById('btn-start').textContent = 'Restart Demo';
+    }
+
+    document.getElementById('wad-file').addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+
+        document.getElementById('loading-status').textContent = 'Loading ' + file.name + '...';
+
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                running = false;
+                var wad = new WADReader(ev.target.result);
+                var mapName = 'E1M1';
+                // Try E1M1 first, then MAP01 (for DOOM2)
+                var found = wad.directory.find(function(d) { return d.name === 'E1M1'; });
+                if (!found) {
+                    found = wad.directory.find(function(d) { return d.name === 'MAP01'; });
+                    if (found) mapName = 'MAP01';
+                }
+                if (!found) {
+                    document.getElementById('loading-status').textContent = 'Error: No E1M1 or MAP01 found in WAD';
+                    return;
+                }
+                var map = new DoomMap(wad, mapName);
+                startEngine(map, true);
+                document.getElementById('btn-start').textContent = 'Restart Demo';
+            } catch (err) {
+                document.getElementById('loading-status').textContent = 'Error: ' + err.message;
+                console.error(err);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    });
+
+    function goFullscreen() {
+        var c = document.getElementById('game-container');
+        if (c.requestFullscreen) c.requestFullscreen();
+        else if (c.webkitRequestFullscreen) c.webkitRequestFullscreen();
+    }
+
+    // Auto-start demo on page load for immediate visual feedback
+    window.addEventListener('DOMContentLoaded', function() {
+        // Don't auto-start, let the user click
+    });
     </script>
 </body>
 </html>
