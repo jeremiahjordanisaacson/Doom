@@ -446,15 +446,28 @@
     }
 
     // ================================================================
-    // Renderer
+    // Renderer (optimized)
     // ================================================================
     var SCREEN_W = 320, SCREEN_H = 200;
+    var HALF_W = 160, HALF_H = 100;
     var canvas, ctx, imageData, pixels;
     var upperClip, lowerClip;
     var playerX = 0, playerY = 0, playerAngle = 0, playerZ = 41;
     var currentMap = null, currentMapName = '';
     var running = false;
     var frameCount = 0, lastFpsTime = 0, fps = 0;
+
+    // Per-frame cached trig
+    var frameCos = 1, frameSin = 0;
+
+    // Pre-built colormap lookup: lightPal[cmapIdx] = Uint32Array(256) of final ABGR colors
+    var lightPal = null; // array of 32 Uint32Arrays
+
+    // Solid columns counter for early exit
+    var solidColumns = 0;
+
+    // Reusable vertex objects to avoid GC pressure
+    var _v1 = {x:0, y:0}, _v2 = {x:0, y:0};
 
     function initRenderer() {
         canvas = document.getElementById('doom-canvas');
@@ -467,6 +480,20 @@
         lowerClip = new Int32Array(SCREEN_W);
     }
 
+    function buildLightPalettes() {
+        // Pre-build 32 colormapped palettes as Uint32Arrays for direct pixel writes
+        if (palettes.length === 0) return;
+        var pal = palettes[0];
+        lightPal = new Array(32);
+        for (var c = 0; c < 32; c++) {
+            lightPal[c] = new Uint32Array(256);
+            var cmap = colormaps.length > c ? colormaps[c] : null;
+            for (var i = 0; i < 256; i++) {
+                lightPal[c][i] = pal[cmap ? cmap[i] : i];
+            }
+        }
+    }
+
     function setMap(map) {
         currentMap = map;
         currentMapName = map.name;
@@ -476,15 +503,12 @@
             playerY = start.y;
             playerAngle = (start.angle * Math.PI) / 180;
         }
+        buildLightPalettes();
     }
 
-    function getColormap(lightLevel, depth) {
-        // Simulate DOOM's diminishing lighting
-        if (colormaps.length === 0) return 0;
-        var lightIdx = Math.floor((255 - lightLevel) / 8);
-        var distFade = Math.floor(depth / 200);
-        var cmapIdx = Math.min(31, Math.max(0, lightIdx + distFade));
-        return cmapIdx;
+    function getCmapIdx(lightLevel, depth) {
+        var idx = ((255 - lightLevel) >> 3) + ((depth / 200) | 0);
+        return idx < 0 ? 0 : idx > 31 ? 31 : idx;
     }
 
     function render() {
@@ -492,6 +516,11 @@
         pixels.fill(0xFF000000);
         upperClip.fill(0);
         lowerClip.fill(SCREEN_H);
+        solidColumns = 0;
+
+        // Cache trig for this frame
+        frameCos = Math.cos(playerAngle);
+        frameSin = Math.sin(playerAngle);
 
         if (currentMap.nodes.length > 0) {
             renderBSP(currentMap.nodes.length - 1);
@@ -503,44 +532,28 @@
     }
 
     function renderBSP(nodeIndex) {
+        if (solidColumns >= SCREEN_W) return; // All columns filled, stop traversal
         if (nodeIndex & 0x8000) { renderSubsector(nodeIndex & 0x7FFF); return; }
         var node = currentMap.nodes[nodeIndex];
         if (!node) return;
         var dx = playerX - node.x, dy = playerY - node.y;
-        var side = (dx * node.dy - dy * node.dx) < 0;
-        if (side) { renderBSP(node.leftChild); renderBSP(node.rightChild); }
-        else { renderBSP(node.rightChild); renderBSP(node.leftChild); }
+        if ((dx * node.dy - dy * node.dx) < 0) {
+            renderBSP(node.leftChild);
+            if (solidColumns < SCREEN_W) renderBSP(node.rightChild);
+        } else {
+            renderBSP(node.rightChild);
+            if (solidColumns < SCREEN_W) renderBSP(node.leftChild);
+        }
     }
 
     function renderSubsector(index) {
+        if (solidColumns >= SCREEN_W) return;
         var ss = currentMap.subsectors[index];
         if (!ss) return;
-
-        // Determine sector for floor/ceiling rendering
-        var seg0 = currentMap.segs[ss.firstSeg];
-        if (seg0) {
-            var ld0 = currentMap.linedefs[seg0.linedef];
-            if (ld0) {
-                var sideIdx0 = seg0.direction === 0 ? ld0.frontSide : ld0.backSide;
-                if (sideIdx0 >= 0) {
-                    var side0 = currentMap.sidedefs[sideIdx0];
-                    if (side0) {
-                        var sector0 = currentMap.sectors[side0.sector];
-                        if (sector0) renderFlatsForSubsector(ss, sector0);
-                    }
-                }
-            }
-        }
-
         for (var i = 0; i < ss.numSegs; i++) {
             var seg = currentMap.segs[ss.firstSeg + i];
             if (seg) renderSeg(seg);
         }
-    }
-
-    function renderFlatsForSubsector(ss, sector) {
-        // We'll render floors/ceilings as part of wall rendering (per-column)
-        // This is handled inside renderSeg
     }
 
     function renderSeg(seg) {
@@ -548,12 +561,19 @@
         var v2 = currentMap.vertices[seg.v2];
         if (!v1 || !v2) return;
 
-        var p1 = transformVertex(v1);
-        var p2 = transformVertex(v2);
-        if (p1.y <= 1 && p2.y <= 1) return;
+        // Inline transform (uses cached frameCos/frameSin)
+        var dx1 = v1.x - playerX, dy1 = v1.y - playerY;
+        var dx2 = v2.x - playerX, dy2 = v2.y - playerY;
+        var p1x = dx1 * frameCos - dy1 * frameSin;
+        var p1y = dx1 * frameSin + dy1 * frameCos;
+        var p2x = dx2 * frameCos - dy2 * frameSin;
+        var p2y = dx2 * frameSin + dy2 * frameCos;
 
-        if (p1.y < 1) { var t = (1 - p1.y) / (p2.y - p1.y); p1 = { x: p1.x + t * (p2.x - p1.x), y: 1 }; }
-        if (p2.y < 1) { var t = (1 - p2.y) / (p1.y - p2.y); p2 = { x: p2.x + t * (p1.x - p2.x), y: 1 }; }
+        if (p1y <= 1 && p2y <= 1) return;
+
+        // Near-plane clip
+        if (p1y < 1) { var t = (1 - p1y) / (p2y - p1y); p1x = p1x + t * (p2x - p1x); p1y = 1; }
+        if (p2y < 1) { var t = (1 - p2y) / (p1y - p2y); p2x = p2x + t * (p1x - p2x); p2y = 1; }
 
         var ld = currentMap.linedefs[seg.linedef];
         if (!ld) return;
@@ -564,193 +584,192 @@
         var sector = currentMap.sectors[side.sector];
         if (!sector) return;
 
-        // Back sector for two-sided lines
-        var backSector = null;
-        if (ld.backSide >= 0) {
-            var backSideIdx = seg.direction === 0 ? ld.backSide : ld.frontSide;
-            if (backSideIdx >= 0 && backSideIdx < currentMap.sidedefs.length) {
-                var bs = currentMap.sidedefs[backSideIdx];
-                if (bs) backSector = currentMap.sectors[bs.sector];
-            }
-        }
-
-        var x1 = projectX(p1);
-        var x2 = projectX(p2);
+        // Project to screen
+        var x1 = HALF_W + (p1x / p1y) * HALF_W;
+        var x2 = HALF_W + (p2x / p2y) * HALF_W;
         if (x1 >= x2) return;
+
+        var iStart = x1 < 0 ? 0 : (x1 | 0);
+        var iEnd = x2 > SCREEN_W ? SCREEN_W : ((x2 + 0.999) | 0);
+        if (iStart >= iEnd) return;
+
+        // Check if any columns in range are open
+        var anyOpen = false;
+        for (var check = iStart; check < iEnd; check++) {
+            if (upperClip[check] < lowerClip[check]) { anyOpen = true; break; }
+        }
+        if (!anyOpen) return;
 
         var floorH = sector.floorHeight - playerZ;
         var ceilH = sector.ceilingHeight - playerZ;
-        var light = Math.min(255, Math.max(0, sector.lightLevel));
+        var light = sector.lightLevel;
+        if (light < 0) light = 0; else if (light > 255) light = 255;
 
-        // Calculate wall segment length for texture mapping
+        // Seg length for texture mapping
         var wx = currentMap.vertices[seg.v2].x - currentMap.vertices[seg.v1].x;
         var wy = currentMap.vertices[seg.v2].y - currentMap.vertices[seg.v1].y;
         var segLen = Math.sqrt(wx * wx + wy * wy);
 
-        // Get texture info
-        var texName = side.middle;
-        var tex = (texName && texName !== '-') ? wallTextures[texName] : null;
-        var upperTex = (side.upper && side.upper !== '-') ? wallTextures[side.upper] : null;
-        var lowerTex = (side.lower && side.lower !== '-') ? wallTextures[side.lower] : null;
+        // Textures
+        var tex = null, upperTex = null, lowerTex = null;
+        var mn = side.middle;
+        if (mn && mn !== '-') tex = wallTextures[mn];
+        var un = side.upper;
+        if (un && un !== '-') upperTex = wallTextures[un];
+        var ln = side.lower;
+        if (ln && ln !== '-') lowerTex = wallTextures[ln];
 
-        var iStart = Math.max(0, Math.floor(x1));
-        var iEnd = Math.min(SCREEN_W, Math.ceil(x2));
+        // Back sector
+        var backSector = null;
+        if (ld.backSide >= 0) {
+            var bsi = seg.direction === 0 ? ld.backSide : ld.frontSide;
+            if (bsi >= 0 && bsi < currentMap.sidedefs.length) {
+                var bs = currentMap.sidedefs[bsi];
+                if (bs) backSector = currentMap.sectors[bs.sector];
+            }
+        }
+
+        var xRange = x2 - x1;
+        var invXRange = 1.0 / xRange;
+        var segOff = seg.offset + side.xOffset;
+        var sideYOff = side.yOffset;
+        var isSolid = !backSector;
+
+        // Flat rendering pre-computed values
+        var ceilFlat = flatTextures[sector.ceilingFlat];
+        var floorFlat = flatTextures[sector.floorFlat];
+        var ceilPlaneH = sector.ceilingHeight - playerZ;
+        var floorPlaneH = sector.floorHeight - playerZ;
 
         for (var x = iStart; x < iEnd; x++) {
-            if (upperClip[x] >= lowerClip[x]) continue;
+            var uc = upperClip[x], lc = lowerClip[x];
+            if (uc >= lc) continue;
 
-            var screenT = (x - x1) / (x2 - x1);
-            var depth = p1.y + screenT * (p2.y - p1.y);
+            var screenT = (x - x1) * invXRange;
+            var depth = p1y + screenT * (p2y - p1y);
             if (depth <= 0.1) continue;
 
-            var halfH = SCREEN_H / 2;
-            var scale = halfH / depth;
-            var yTop = Math.floor(halfH - ceilH * scale);
-            var yBottom = Math.floor(halfH - floorH * scale);
+            var scale = HALF_H / depth;
+            var yTop = (HALF_H - ceilH * scale) | 0;
+            var yBottom = (HALF_H - floorH * scale) | 0;
 
-            var cmapIdx = getColormap(light, depth);
-            var cmap = colormaps.length > 0 ? colormaps[cmapIdx] : null;
-            var pal = palettes.length > 0 ? palettes[0] : null;
+            // Get pre-built palette for this depth/light
+            var cmIdx = getCmapIdx(light, depth);
+            var lp = lightPal ? lightPal[cmIdx] : null;
 
-            // Texture column
-            var wallTexOffset = seg.offset + screenT * segLen + side.xOffset;
+            var wallTexOff = segOff + screenT * segLen;
 
-            // For two-sided lines: upper and lower walls
             if (backSector) {
                 var backFloorH = backSector.floorHeight - playerZ;
                 var backCeilH = backSector.ceilingHeight - playerZ;
-                var yBackTop = Math.floor(halfH - backCeilH * scale);
-                var yBackBottom = Math.floor(halfH - backFloorH * scale);
+                var yBT = (HALF_H - backCeilH * scale) | 0;
+                var yBB = (HALF_H - backFloorH * scale) | 0;
 
-                // Upper wall (between front ceiling and back ceiling)
+                // Upper wall
                 if (sector.ceilingHeight > backSector.ceilingHeight) {
-                    var uTop = Math.max(upperClip[x], yTop);
-                    var uBottom = Math.min(lowerClip[x], yBackTop);
-                    if (uTop < uBottom) {
-                        drawWallColumn(x, uTop, uBottom, upperTex, wallTexOffset, side.yOffset,
-                            sector.ceilingHeight, backSector.ceilingHeight, scale, depth, cmap, pal, light);
-                    }
+                    var uT = uc > yTop ? uc : yTop;
+                    var uB = lc < yBT ? lc : yBT;
+                    if (uT < uB) drawWallCol(x, uT, uB, upperTex, wallTexOff, sideYOff,
+                        sector.ceilingHeight, backSector.ceilingHeight, scale, lp, light, depth);
                 }
 
-                // Lower wall (between back floor and front floor)
+                // Lower wall
                 if (sector.floorHeight < backSector.floorHeight) {
-                    var lTop = Math.max(upperClip[x], yBackBottom);
-                    var lBottom = Math.min(lowerClip[x], yBottom);
-                    if (lTop < lBottom) {
-                        drawWallColumn(x, lTop, lBottom, lowerTex, wallTexOffset, side.yOffset,
-                            backSector.floorHeight, sector.floorHeight, scale, depth, cmap, pal, light);
-                    }
+                    var lT = uc > yBB ? uc : yBB;
+                    var lB = lc < yBottom ? lc : yBottom;
+                    if (lT < lB) drawWallCol(x, lT, lB, lowerTex, wallTexOff, sideYOff,
+                        backSector.floorHeight, sector.floorHeight, scale, lp, light, depth);
                 }
 
-                // Ceiling
-                var cTop = upperClip[x];
-                var cBottom = Math.min(lowerClip[x], yTop);
-                drawFlatSpan(x, cTop, cBottom, sector.ceilingFlat, sector.ceilingHeight, light, depth, cmap, pal, true);
+                // Ceiling flat
+                var cT = uc, cB = lc < yTop ? lc : yTop;
+                if (cT < cB) drawFlatCol(x, cT, cB, ceilFlat, ceilPlaneH, light, lp);
 
-                // Floor
-                var fTop = Math.max(upperClip[x], yBottom);
-                var fBottom = lowerClip[x];
-                drawFlatSpan(x, fTop, fBottom, sector.floorFlat, sector.floorHeight, light, depth, cmap, pal, false);
+                // Floor flat
+                var fT = uc > yBottom ? uc : yBottom, fB = lc;
+                if (fT < fB) drawFlatCol(x, fT, fB, floorFlat, floorPlaneH, light, lp);
 
-                // Update clipping
-                if (yTop > upperClip[x]) upperClip[x] = Math.min(yTop, lowerClip[x]);
-                if (yBottom < lowerClip[x]) lowerClip[x] = Math.max(yBottom, upperClip[x]);
+                // Update clip
+                if (yTop > uc) upperClip[x] = yTop < lc ? yTop : lc;
+                if (yBottom < lc) lowerClip[x] = yBottom > uc ? yBottom : uc;
             } else {
-                // Solid wall
-                var drawTop = Math.max(upperClip[x], yTop);
-                var drawBottom = Math.min(lowerClip[x], yBottom);
+                var dT = uc > yTop ? uc : yTop;
+                var dB = lc < yBottom ? lc : yBottom;
 
                 // Wall
-                if (drawTop < drawBottom) {
-                    drawWallColumn(x, drawTop, drawBottom, tex, wallTexOffset, side.yOffset,
-                        sector.ceilingHeight, sector.floorHeight, scale, depth, cmap, pal, light);
-                }
+                if (dT < dB) drawWallCol(x, dT, dB, tex, wallTexOff, sideYOff,
+                    sector.ceilingHeight, sector.floorHeight, scale, lp, light, depth);
 
-                // Ceiling
-                var cTop = upperClip[x];
-                var cBottom = Math.min(drawTop, lowerClip[x]);
-                drawFlatSpan(x, cTop, cBottom, sector.ceilingFlat, sector.ceilingHeight, light, depth, cmap, pal, true);
+                // Ceiling flat
+                var cB2 = dT < lc ? dT : lc;
+                if (uc < cB2) drawFlatCol(x, uc, cB2, ceilFlat, ceilPlaneH, light, lp);
 
-                // Floor
-                var fTop = Math.max(drawBottom, upperClip[x]);
-                var fBottom = lowerClip[x];
-                drawFlatSpan(x, fTop, fBottom, sector.floorFlat, sector.floorHeight, light, depth, cmap, pal, false);
+                // Floor flat
+                var fT2 = dB > uc ? dB : uc;
+                if (fT2 < lc) drawFlatCol(x, fT2, lc, floorFlat, floorPlaneH, light, lp);
 
-                upperClip[x] = lowerClip[x];
+                upperClip[x] = lc;
+                solidColumns++;
             }
         }
     }
 
-    function drawWallColumn(x, yStart, yEnd, tex, texOffsetX, texOffsetY, topWorldZ, botWorldZ, scale, depth, cmap, pal, light) {
-        if (tex && pal) {
-            var texCol = (Math.floor(texOffsetX) % tex.width + tex.width) % tex.width;
-            var wallHeight = topWorldZ - botWorldZ;
+    function drawWallCol(x, yStart, yEnd, tex, texOffsetX, texOffsetY, topZ, botZ, scale, lp, light, depth) {
+        var pix = pixels;
+        if (tex && lp) {
+            var tW = tex.width, tH = tex.height, tPix = tex.pixels;
+            var texCol = ((texOffsetX | 0) % tW + tW) % tW;
+            var wallH = topZ - botZ;
+            var wallScreenH = wallH * scale;
+            var invWallScreenH = wallScreenH > 0 ? 1.0 / wallScreenH : 0;
+            var yOrigin = HALF_H - topZ * scale + playerZ * scale;
             for (var y = yStart; y < yEnd; y++) {
-                if (y < 0 || y >= SCREEN_H) continue;
-                var frac = (y - (SCREEN_H / 2 - topWorldZ * scale + playerZ * scale)) / (wallHeight * scale);
-                var texY = Math.floor((frac * wallHeight + texOffsetY) % tex.height);
-                if (texY < 0) texY += tex.height;
-                var palIdx = tex.pixels[texY * tex.width + texCol];
-                if (palIdx < 0) continue; // transparent
-                if (cmap) palIdx = cmap[palIdx];
-                pixels[y * SCREEN_W + x] = pal[palIdx];
+                var frac = (y - yOrigin) * invWallScreenH;
+                var texY = ((frac * wallH + texOffsetY) | 0) % tH;
+                if (texY < 0) texY += tH;
+                var palIdx = tPix[texY * tW + texCol];
+                if (palIdx >= 0) pix[y * SCREEN_W + x] = lp[palIdx];
             }
         } else {
-            // Fallback: solid color shading
-            var shade = Math.min(1.0, light / 255) * Math.min(1.0, 400 / (depth + 50));
-            var wallColor = 0xFF000000 | (Math.floor(60 * shade) << 16) | (Math.floor(50 * shade) << 8) | Math.floor(90 * shade);
-            for (var y = yStart; y < yEnd; y++) {
-                if (y >= 0 && y < SCREEN_H) pixels[y * SCREEN_W + x] = wallColor;
-            }
+            // Fallback solid color
+            var shade = light * 0.00392 * (400 / (depth + 50)); // 0.00392 = 1/255
+            if (shade > 1) shade = 1;
+            var c = 0xFF000000 | ((60 * shade | 0) << 16) | ((50 * shade | 0) << 8) | (90 * shade | 0);
+            for (var y = yStart; y < yEnd; y++) pix[y * SCREEN_W + x] = c;
         }
     }
 
-    function drawFlatSpan(x, yStart, yEnd, flatName, planeZ, light, wallDepth, cmap, pal, isCeiling) {
-        var flatData = flatTextures[flatName];
-        if (flatData && pal) {
-            var planeH = planeZ - playerZ;
-            var halfH = SCREEN_H / 2;
-            var cosA = Math.cos(playerAngle);
-            var sinA = Math.sin(playerAngle);
-
+    function drawFlatCol(x, yStart, yEnd, flatData, planeH, light, lp) {
+        var pix = pixels;
+        if (flatData && lp) {
+            var absPlaneH = planeH < 0 ? -planeH : planeH;
+            var halfHAbsP = HALF_H * absPlaneH;
+            // Pre-compute column direction vector component
+            var colFrac = (x - HALF_W) / HALF_W; // -1 to 1
+            var dirX = frameSin + colFrac * frameCos;
+            var dirY = frameCos - colFrac * frameSin;
             for (var y = yStart; y < yEnd; y++) {
-                if (y < 0 || y >= SCREEN_H) continue;
-                var rowDist = halfH * Math.abs(planeH) / Math.abs(y - halfH + 0.01);
-                var floorX = playerX + rowDist * (sinA + (x - SCREEN_W / 2) * cosA / (SCREEN_W / 2));
-                var floorY = playerY + rowDist * (cosA - (x - SCREEN_W / 2) * sinA / (SCREEN_W / 2));
-                var tx = ((Math.floor(floorX) % 64) + 64) % 64;
-                var ty = ((Math.floor(floorY) % 64) + 64) % 64;
+                var dy = y - HALF_H;
+                if (dy === 0) dy = 0.01;
+                var rowDist = halfHAbsP / (dy < 0 ? -dy : dy);
+                var fx = (playerX + rowDist * dirX) | 0;
+                var fy = (playerY + rowDist * dirY) | 0;
+                var tx = ((fx & 63) + 64) & 63;
+                var ty = ((fy & 63) + 64) & 63;
                 var palIdx = flatData[ty * 64 + tx];
-                var cmIdx = getColormap(light, rowDist);
-                if (colormaps.length > 0) palIdx = colormaps[cmIdx][palIdx];
-                pixels[y * SCREEN_W + x] = pal[palIdx];
+                // Use distance-based colormap
+                var ci = ((255 - light) >> 3) + ((rowDist / 200) | 0);
+                if (ci > 31) ci = 31; else if (ci < 0) ci = 0;
+                var clp = lightPal[ci];
+                pix[y * SCREEN_W + x] = clp[palIdx];
             }
         } else {
             // Fallback
-            var shade = Math.min(1.0, light / 255) * Math.min(1.0, 400 / (wallDepth + 50));
-            var color;
-            if (isCeiling) {
-                var cs = shade * 0.5;
-                color = 0xFF000000 | (Math.floor(60 * cs) << 16) | (Math.floor(60 * cs) << 8) | Math.floor(60 * cs);
-            } else {
-                var fs = shade * 0.7;
-                color = 0xFF000000 | (Math.floor(40 * fs) << 16) | (Math.floor(70 * fs) << 8) | Math.floor(40 * fs);
-            }
-            for (var y = yStart; y < yEnd; y++) {
-                if (y >= 0 && y < SCREEN_H) pixels[y * SCREEN_W + x] = color;
-            }
+            var shade = light * 0.00196; // light/255 * 0.5
+            if (shade > 0.5) shade = 0.5;
+            var c = 0xFF000000 | ((60 * shade | 0) << 16) | ((60 * shade | 0) << 8) | (60 * shade | 0);
+            for (var y = yStart; y < yEnd; y++) pix[y * SCREEN_W + x] = c;
         }
-    }
-
-    function transformVertex(v) {
-        var dx = v.x - playerX, dy = v.y - playerY;
-        var cos = Math.cos(playerAngle), sin = Math.sin(playerAngle);
-        return { x: dx * cos - dy * sin, y: dx * sin + dy * cos };
-    }
-
-    function projectX(p) {
-        if (p.y <= 0) return p.x > 0 ? SCREEN_W : 0;
-        return (SCREEN_W / 2) + (p.x / p.y) * (SCREEN_W / 2);
     }
 
     // ================================================================
