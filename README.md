@@ -162,6 +162,12 @@ and WAD distribution policies are documented in [LEGAL.md](LEGAL.md).
 
 ---
 
+## See also
+
+- [doom-flow](https://github.com/godofecht/doom-flow): DOOM in the [Flow](https://github.com/flooooooooooow/flow) language, compiled to WebAssembly.
+
+---
+
 ## License
 
 ```
